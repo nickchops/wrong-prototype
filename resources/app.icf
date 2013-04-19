@@ -1,0 +1,10 @@
+[S3E]
+DispFixRot=Landscape
+
+[GL]
+VirtualWidth=640
+VirtualHeight=480
+VirtualLetterbox=1
+
+[QUICK]
+mainFilename="main.lua"
