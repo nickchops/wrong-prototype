@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="WRONG Prototype : Weaponified Reverse pONG - Marmalade Quick demo game - prototype version" />
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>WRONG Prototype by nickmarmalade</title>
+    <title>WRONG Prototype</title>
   </head>
 
   <body>
-    <header>
-      <div class="inner">
-        <h1>WRONG Prototype</h1>
-        <h2>Weaponified Reverse pONG - Marmalade Quick demo game - prototype version</h2>
-        <a href="https://github.com/nickmarmalade/wrong-prototype" class="button"><small>View project on</small>GitHub</a>
-      </div>
-    </header>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h3>
-<a name="welcome-to-the-github-page-for-the-wrong-prototype" class="anchor" href="#welcome-to-the-github-page-for-the-wrong-prototype"><span class="octicon octicon-link"></span></a>Welcome to the GitHub page for The WRONG prototype</h3>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/nickmarmalade/wrong-prototype">View on GitHub</a>
+
+          <h1 id="project_title">WRONG Prototype</h1>
+          <h2 id="project_tagline">Weaponified Reverse pONG - Marmalade Quick demo game - prototype version</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/nickmarmalade/wrong-prototype/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/nickmarmalade/wrong-prototype/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2>
+<a name="welcome-to-the-github-page-for-the-wrong-prototype" class="anchor" href="#welcome-to-the-github-page-for-the-wrong-prototype"><span class="octicon octicon-link"></span></a>Welcome to the GitHub page for The WRONG prototype</h2>
 
 <p>This repository contains the source for a prototype Marmalade Quick game.</p>
 
@@ -41,34 +44,97 @@
 <p>The Marmalade website was re-designed in late 2013 and the blog is currently being moved. In the meantime, you may be able to access the old version by replacing "www" with "legacy" in the URLs. For example:
 <a href="http://legacy.madewithmarmalade.com/blog/building-marmalade-quick-game-nick-smith-part-1-getting-started">http://legacy.madewithmarmalade.com/blog/building-marmalade-quick-game-nick-smith-part-1-getting-started</a></p>
 
-<h3>
-<a name="blog-posts" class="anchor" href="#blog-posts"><span class="octicon octicon-link"></span></a>Blog Posts</h3>
+<p>The Quick blog posts are also reproduced below...</p>
 
-<p>The Quick blog posts are reproduced below...</p>
+<h2>
+<a name="building-a-marmalade-quick-game-with-nick-smith-part-1-getting-started" class="anchor" href="#building-a-marmalade-quick-game-with-nick-smith-part-1-getting-started"><span class="octicon octicon-link"></span></a>Building a Marmalade Quick Game with Nick Smith, part 1: Getting Started</h2>
+
+<p>Now that Marmalade Quick is available (<a href="http://www.madewithmarmalade.com/quick">download it right here</a>), I'll be building an app or two with Marmalade Quick and doing regular blog posts detailing the highs and lows encountered on the way. I'll be highlighting features, walking through how to use both tools and APIs, and giving tips and hints for getting the most out of Marmalade Quick. Since we've just gone into the first full release following a public beta version, I'll also be highlighting changes from the beta version, giving updates on new features we've added and previewing what's on the way in the next release.I started using Marmalade Quick in earnest over Christmas, with little-to-no Lua experience and having never worked on any of its internals or design. These blog posts will take us from "What is Marmalade Quick?! What is Lua?!" right through to uploading to the various stores and dropping the source onto GitHub.</p>
 
 <h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<a name="so-what-actually-is-quick" class="anchor" href="#so-what-actually-is-quick"><span class="octicon octicon-link"></span></a>So, what actually is Quick?</h3>
+
+<p>Marmalade Quick aims to be the fastest, most flexible, most open way to create cross-platform 2D games and apps for mobile devices.</p>
+
+<p>Marmalade itself is a C++/native SDK for building high-performance apps with a single open-standards API set, and deploying them effortlessly to a wide range of devices - iOS, Android, BlackBerry 10, Windows, Mac... - without needing to use any OS-specific code or tools.</p>
+
+<p>Marmalade Quick is essentially middleware that sits on top of Marmalade and provides a high level, easy-to-use interface via the Lua scripting language. Quick allows you to write interactive apps using 2D graphics, physics and touch interactivity in as little as 15 lines of code. Internally it uses best-in-class C++ modules like Cocos2D and Box2D to do the hard work for you.</p>
+
+<p>Marmalade Quick comes with pre-built C++ apps and open source Lua scripts that combine to load and run your Lua/Quick code. You don't need to touch or understand the C++ parts, but both those and the Lua internals are provided as source, which you can modify and extend if you want. Quick comes with Lua wrappers for the core Marmalade C APIs plus its own 2D graphics and physics APIs. You can essentially extend Marmalade Quick to provide Lua interfaces to any Marmalade C APIs (we'll cover that in a future post!).</p>
+
+<p>Marmalade Quick also has a new Launchpad tool that lets you manage, run and deploy projects from a simple interface without touching an IDE or Marmalade's standard deploy tool.
+So what does that mean in practice? Basically, you open the Launchpad, click "New Project", type some simple Lua code in a text editor, and get a 2D game up and running with no C++ or graphics programming knowledge. You can hit "Launch" to test on desktop, "Deploy" to run on devices and "Publish" to spit out a build ready for an app store.</p>
+
+<h3>
+<a name="what-you-need-to-use-marmalade-quick" class="anchor" href="#what-you-need-to-use-marmalade-quick"><span class="octicon octicon-link"></span></a>What you need to use Marmalade Quick</h3>
+
+<p>Download, license and install the latest Marmalade SDK build from here: <a href="https://www.madewithmarmalade.com/downloads">https://www.madewithmarmalade.com/downloads</a></p>
+
+<p>New users can sign up for free and use an eval license (eval licenses mean deployed apps will be watermarked and not valid for publishing). You can use Mac or PC for both Marmalade SDK and Quick and you can deploy to all standard platforms with either.</p>
+
+<p>(Quick is now bundled inside the regular Marmalade SDK and requires no additional setup steps)
+<del>Download Marmalade Quick for Windows or Mac from here:</del>
+<del><a href="http://www.madewithmarmalade.com/quick">http://www.madewithmarmalade.com/quick</a></del>
+<del>Its a zip file, just extract it into the root folder of your 6.2 SDK. It's safe and only adds files (no overwriting). On Mac, make sure you <em>merge</em> folders instead of replacing them! (use terminal with "rsync -arvu " if needed)</del></p>
+
+<p>Documentation for Marmalade Quick is online here:
+<del><a href="http://quick-docs.madewithmarmalade.com">http://quick-docs.madewithmarmalade.com</a></del>
+(now at <a href="http://docs.madewithmarmalade.com/display/MD/Marmalade+Quick">http://docs.madewithmarmalade.com/display/MD/Marmalade+Quick</a>)</p>
+
+<p>We don't currently offer offline documentation, <del>but feel free to save them from the browser. Search will work without an Internet connection.</del></p>
+
+<p>Marmalade Quick doesn't need any additional SDKs or even an IDE. You can edit game code in a text editor, the app binary is pre-built for you and your code is compiled automatically at runtime.</p>
+
+<p>As with the regular Marmalade SDK, in order to deploy to devices, you will need:</p>
+
+<ul>
+<li>iOS and BlackBerry signing assets and accounts (certificates, profiles etc - we'll cover these in       another post!)</li>
+<li>Java runtime for Android and BlackBerry signing</li>
+<li>On Mac you need Python 2.6 or newer (python ships built-in with Marmalade for Windows)</li>
+</ul><h3>
+<a name="first-steps" class="anchor" href="#first-steps"><span class="octicon octicon-link"></span></a>First steps</h3>
+
+<p>Once Marmalade is installed (and licensed - follow the registration prompt at the end of installation), just go to /quick/tools and run the Quick Launchpad exe/app file from there.</p>
+
+<p>Follow the steps in A Quick App in 5 Minutes in the docs:
+<del><a href="http://quick-docs.madewithmarmalade.com/AQuickAppIn5Minutes.html">http://quick-docs.madewithmarmalade.com/AQuickAppIn5Minutes.html</a></del>
+(<a href="http://docs.madewithmarmalade.com/display/MD/A+Quick+App+in+5+Minutes">http://docs.madewithmarmalade.com/display/MD/A+Quick+App+in+5+Minutes</a>)</p>
+
+<p>I'll be walking through some real world code in the next few posts. For now, I'd encourage you to dive in and see what you can build! A good starting point is the examples in quick/data/examples (there's a lot more there than the ones listed by default in the Launchpad).</p>
+
+<p>Quick tip: You don't need to close and re-launch the Simulator when you edit code. Just save your Lua file(s) and hit Ctrl-R in the Simulator to reload the Lua code. Ctrl-T will restart the whole app (useful if you manage to really confuse the Simulator).</p>
+
+<h3>
+<a name="where-is-support-for-platform-x" class="anchor" href="#where-is-support-for-platform-x"><span class="octicon octicon-link"></span></a>Where is Support for Platform X?</h3>
+
+<p>Quick is completely platform-independent: There is, for example, no iOS-specific code anywhere in it. Marmalade itself takes care of platform abstraction and so Quick will technically run on <em>all</em> Marmalade-supported devices. However, for Quick we decided to implement a new project management and deployment GUI, the "Quick LaunchPad", which provides a new front end to Marmalade's existing deployment tools. In the initial release, only iOS, Android, BlackBerry PlayBook and BlackBerry 10 are provided in the Launchpad, and not all of the usual Marmalade deployment options (for things like specific icons and permissions) are supported. However, you can still run Marmalade Quick with all existing Marmalade deploy options on all supported platforms...
+You'll need to use the standard Deploy Tool in order to access additional platforms and options. You can launch this directly from within the new Launchpad:
+In the launchpad, use the Advanced &gt; Launch Deploy Tool option
+Under "Stage: Select Build" choose ARM GCC Release for devices or x86 Release for desktop
+Under Platform Selection choose the OS/platforms you want to deploy to
+Under Configuration, select the options you need (see below)
+Under Deploying, do "package" or "package and install" to put on device.
+Standard Deployment Tool settings are all documented here
+Note that Quick has not been well tested against the Marmalade 6.2 beta SDK for Windows Phone 8 and we are not officially supporting Quick on WP8 yet.</p>
+
+<p>(NB: From Marmalade 7.0, Quick uses the new Marmalade Hub GUI and supports most platforms out of the box. See <a href="http://docs.madewithmarmalade.com/display/MD/What+do+we+support">http://docs.madewithmarmalade.com/display/MD/What+do+we+support</a>)</p>
+
+<h2>
+<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h2>
 
 <p>The prototype and blog are both written by Nick Smith <a href="https://github.com/nickmarmalade" class="user-mention">@nickmarmalade</a>.</p>
-        </section>
-
-        <aside id="sidebar">
-          <a href="https://github.com/nickmarmalade/wrong-prototype/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/nickmarmalade/wrong-prototype/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
-
-          <p class="repo-owner"><a href="https://github.com/nickmarmalade/wrong-prototype"></a> is maintained by <a href="https://github.com/nickmarmalade">nickmarmalade</a>.</p>
-
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
+      </section>
     </div>
 
-  
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">WRONG Prototype maintained by <a href="https://github.com/nickmarmalade">nickmarmalade</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
   </body>
 </html>
