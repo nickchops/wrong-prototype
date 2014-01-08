@@ -1,37 +1,34 @@
 <!DOCTYPE html>
 <html>
-
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="WRONG Prototype : Weaponified Reverse pONG - Marmalade Quick demo game - prototype version" />
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
-    <title>WRONG Prototype</title>
+    <title>WRONG Prototype by nickmarmalade</title>
   </head>
 
   <body>
+    <header>
+      <div class="inner">
+        <h1>WRONG Prototype</h1>
+        <h2>Weaponified Reverse pONG - Marmalade Quick demo game - prototype version</h2>
+        <a href="https://github.com/nickmarmalade/wrong-prototype" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/nickmarmalade/wrong-prototype">View on GitHub</a>
-
-          <h1 id="project_title">WRONG Prototype</h1>
-          <h2 id="project_tagline">Weaponified Reverse pONG - Marmalade Quick demo game - prototype version</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/nickmarmalade/wrong-prototype/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/nickmarmalade/wrong-prototype/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <p>This repository contains the source for a prototype Marmalade Quick game.</p>
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p>This repository contains the source for a prototype Marmalade Quick game.</p>
 
 <p>It was built as part of a blog series on getting started with Marmalade Quick, by Marmalade employee (and owner of this github account) Nick Smith. Marmalade Quick is 2D rapid development middleware that ships with the Marmalade cross platform SDK. It allows you to code 2D games quickly using Lua and, combined with the regular Marmalade tools, lets you easily publish to mobile platforms, PC and Mac.</p>
 
@@ -43,13 +40,13 @@
 
 <p>The Quick blog posts are also reproduced below...</p>
 
-<h2>
-<a name="building-a-marmalade-quick-game-with-nick-smith-part-1-getting-started" class="anchor" href="#building-a-marmalade-quick-game-with-nick-smith-part-1-getting-started"><span class="octicon octicon-link"></span></a>Building a Marmalade Quick Game with Nick Smith, part 1: Getting Started</h2>
+<hr><h1>
+<a name="building-a-marmalade-quick-game-with-nick-smith-part-1-getting-started" class="anchor" href="#building-a-marmalade-quick-game-with-nick-smith-part-1-getting-started"><span class="octicon octicon-link"></span></a>Building a Marmalade Quick Game with Nick Smith, part 1: Getting Started</h1>
 
 <p>Now that Marmalade Quick is available (<a href="http://www.madewithmarmalade.com/quick">download it right here</a>), I'll be building an app or two with Marmalade Quick and doing regular blog posts detailing the highs and lows encountered on the way. I'll be highlighting features, walking through how to use both tools and APIs, and giving tips and hints for getting the most out of Marmalade Quick. Since we've just gone into the first full release following a public beta version, I'll also be highlighting changes from the beta version, giving updates on new features we've added and previewing what's on the way in the next release.I started using Marmalade Quick in earnest over Christmas, with little-to-no Lua experience and having never worked on any of its internals or design. These blog posts will take us from "What is Marmalade Quick?! What is Lua?!" right through to uploading to the various stores and dropping the source onto GitHub.</p>
 
-<h3>
-<a name="so-what-actually-is-quick" class="anchor" href="#so-what-actually-is-quick"><span class="octicon octicon-link"></span></a>So, what actually is Quick?</h3>
+<h2>
+<a name="so-what-actually-is-quick" class="anchor" href="#so-what-actually-is-quick"><span class="octicon octicon-link"></span></a>So, what actually is Quick?</h2>
 
 <p>Marmalade Quick aims to be the fastest, most flexible, most open way to create cross-platform 2D games and apps for mobile devices.</p>
 
@@ -62,8 +59,8 @@
 <p>Marmalade Quick also has a new Launchpad tool that lets you manage, run and deploy projects from a simple interface without touching an IDE or Marmalade's standard deploy tool.
 So what does that mean in practice? Basically, you open the Launchpad, click "New Project", type some simple Lua code in a text editor, and get a 2D game up and running with no C++ or graphics programming knowledge. You can hit "Launch" to test on desktop, "Deploy" to run on devices and "Publish" to spit out a build ready for an app store.</p>
 
-<h3>
-<a name="what-you-need-to-use-marmalade-quick" class="anchor" href="#what-you-need-to-use-marmalade-quick"><span class="octicon octicon-link"></span></a>What you need to use Marmalade Quick</h3>
+<h2>
+<a name="what-you-need-to-use-marmalade-quick" class="anchor" href="#what-you-need-to-use-marmalade-quick"><span class="octicon octicon-link"></span></a>What you need to use Marmalade Quick</h2>
 
 <p>Download, license and install the latest Marmalade SDK build from here: <a href="https://www.madewithmarmalade.com/downloads">https://www.madewithmarmalade.com/downloads</a></p>
 
@@ -88,8 +85,8 @@ So what does that mean in practice? Basically, you open the Launchpad, click "Ne
 <li>iOS and BlackBerry signing assets and accounts (certificates, profiles etc - we'll cover these in       another post!)</li>
 <li>Java runtime for Android and BlackBerry signing</li>
 <li>On Mac you need Python 2.6 or newer (python ships built-in with Marmalade for Windows)</li>
-</ul><h3>
-<a name="first-steps" class="anchor" href="#first-steps"><span class="octicon octicon-link"></span></a>First steps</h3>
+</ul><h2>
+<a name="first-steps" class="anchor" href="#first-steps"><span class="octicon octicon-link"></span></a>First steps</h2>
 
 <p>Once Marmalade is installed (and licensed - follow the registration prompt at the end of installation), just go to /quick/tools and run the Quick Launchpad exe/app file from there.</p>
 
@@ -101,8 +98,8 @@ So what does that mean in practice? Basically, you open the Launchpad, click "Ne
 
 <p>Quick tip: You don't need to close and re-launch the Simulator when you edit code. Just save your Lua file(s) and hit Ctrl-R in the Simulator to reload the Lua code. Ctrl-T will restart the whole app (useful if you manage to really confuse the Simulator).</p>
 
-<h3>
-<a name="where-is-support-for-platform-x" class="anchor" href="#where-is-support-for-platform-x"><span class="octicon octicon-link"></span></a>Where is Support for Platform X?</h3>
+<h2>
+<a name="where-is-support-for-platform-x" class="anchor" href="#where-is-support-for-platform-x"><span class="octicon octicon-link"></span></a>Where is Support for Platform X?</h2>
 
 <p>Quick is completely platform-independent: There is, for example, no iOS-specific code anywhere in it. Marmalade itself takes care of platform abstraction and so Quick will technically run on <em>all</em> Marmalade-supported devices. However, for Quick we decided to implement a new project management and deployment GUI, the "Quick LaunchPad", which provides a new front end to Marmalade's existing deployment tools. In the initial release, only iOS, Android, BlackBerry PlayBook and BlackBerry 10 are provided in the Launchpad, and not all of the usual Marmalade deployment options (for things like specific icons and permissions) are supported. However, you can still run Marmalade Quick with all existing Marmalade deploy options on all supported platforms...
 You'll need to use the standard Deploy Tool in order to access additional platforms and options. You can launch this directly from within the new Launchpad:
@@ -116,13 +113,13 @@ Note that Quick has not been well tested against the Marmalade 6.2 beta SDK for 
 
 <p><strong>(NB: From Marmalade 7.0, Quick uses the new Marmalade Hub GUI and supports most platforms out of the box. See <a href="http://docs.madewithmarmalade.com/display/MD/What+do+we+support">http://docs.madewithmarmalade.com/display/MD/What+do+we+support</a>)</strong></p>
 
-<h2>
-<a name="building-a-marmalade-quick-game-with-nick-smith-part-2-getting-to-grips-with-lua" class="anchor" href="#building-a-marmalade-quick-game-with-nick-smith-part-2-getting-to-grips-with-lua"><span class="octicon octicon-link"></span></a>Building a Marmalade Quick Game with Nick Smith, part 2: Getting to Grips with Lua</h2>
+<hr><h1>
+<a name="building-a-marmalade-quick-game-with-nick-smith-part-2-getting-to-grips-with-lua" class="anchor" href="#building-a-marmalade-quick-game-with-nick-smith-part-2-getting-to-grips-with-lua"><span class="octicon octicon-link"></span></a>Building a Marmalade Quick Game with Nick Smith, part 2: Getting to Grips with Lua</h1>
 
 <p>I'll preface this post by saying that I'm mostly a C++ and Python developer these days. I first used Quick when the alpha release came out and only seriously dove into it over Christmas. Before Quick, I had only ever used Lua to set a few values in scripts for games and had basically no concept of how it actually works; most "issues" I encountered getting to grips with Quick, were actually just getting to grips with Lua!The way I talk about Lua objects and behaviour here is also going to be coloured heavily by my use of C++ and object oriented (OO) programming, so I will definitely be misusing technical terms as much as I possible can. As a first step for users who are new to Lua, I very much recommend that you understand how it handles objects/values, specifically the way that everything is a reference and everything is global by default. With that in mind, for this post I'm going to skip Quick almost entirely and kick off with an idiots guide to Lua.</p>
 
-<h3>
-<a name="whitespace-and-block-endings" class="anchor" href="#whitespace-and-block-endings"><span class="octicon octicon-link"></span></a>Whitespace and block endings</h3>
+<h2>
+<a name="whitespace-and-block-endings" class="anchor" href="#whitespace-and-block-endings"><span class="octicon octicon-link"></span></a>Whitespace and block endings</h2>
 
 <ul>
 <li>Lua uses whitespace only to separate API calls. Unlike Python for example, indentation is irrelevant and only used to make code readable.</li>
@@ -143,21 +140,21 @@ Note that Quick has not been well tested against the Marmalade 6.2 beta SDK for 
 
 <p>Tip: Concatenate strings and numbers using '..' as above.</p>
 
-<h3>
-<a name="comments" class="anchor" href="#comments"><span class="octicon octicon-link"></span></a>Comments</h3>
+<h2>
+<a name="comments" class="anchor" href="#comments"><span class="octicon octicon-link"></span></a>Comments</h2>
 
 <ul>
 <li>Comments are any text following two hyphens (--) in a line.</li>
 <li>Multi-line comments start with --[[ and end with ]]--</li>
-</ul><h3>
-<a name="lua-is-small" class="anchor" href="#lua-is-small"><span class="octicon octicon-link"></span></a>Lua is small!</h3>
+</ul><h2>
+<a name="lua-is-small" class="anchor" href="#lua-is-small"><span class="octicon octicon-link"></span></a>Lua is small!</h2>
 
 <ul>
 <li>There are no classes, private/public, queues or other fancy data types, etc.</li>
 <li>Implement them yourself! Or better, find a module from the web.</li>
 <li>Lua has no +=, ++, etc. operators or any shorthand notation. Ctrl-C/V is your friend!</li>
-</ul><h3>
-<a name="value-types" class="anchor" href="#value-types"><span class="octicon octicon-link"></span></a>Value types</h3>
+</ul><h2>
+<a name="value-types" class="anchor" href="#value-types"><span class="octicon octicon-link"></span></a>Value types</h2>
 
 <p>Lua only provides the following types:</p>
 
@@ -193,15 +190,15 @@ Note that Quick has not been well tested against the Marmalade 6.2 beta SDK for 
 a=1 then a="string" then a = {} then a = myFunction()...end
 </code>
 </li>
-</ul><h3>
-<a name="nil" class="anchor" href="#nil"><span class="octicon octicon-link"></span></a>nil</h3>
+</ul><h2>
+<a name="nil" class="anchor" href="#nil"><span class="octicon octicon-link"></span></a>nil</h2>
 
 <ul>
 <li>You can include an undeclared variable in your code and instead of causing an error/exception, it will just evaluate to nil.</li>
 <li>In conditionals (if, while, etc), nil evaluates to false.</li>
 <li>Unlike in C, zero is <em>not</em> equivalent to false, so "if 0" evaluates to true.</li>
-</ul><h3>
-<a name="functions" class="anchor" href="#functions"><span class="octicon octicon-link"></span></a>Functions</h3>
+</ul><h2>
+<a name="functions" class="anchor" href="#functions"><span class="octicon octicon-link"></span></a>Functions</h2>
 
 <ul>
 <li>Functions objects are declared with the "function" keyword and a parameter list in parentheses "()".</li>
@@ -225,8 +222,8 @@ a=1 then a="string" then a = {} then a = myFunction()...end
 <span class="k">end</span>
 </pre></div>
 
-<h3>
-<a name="references-and-values" class="anchor" href="#references-and-values"><span class="octicon octicon-link"></span></a>References and values</h3>
+<h2>
+<a name="references-and-values" class="anchor" href="#references-and-values"><span class="octicon octicon-link"></span></a>References and values</h2>
 
 <ul>
 <li>Everything in Lua is an object</li>
@@ -271,8 +268,8 @@ So "v" in "for k,v in pairs(myTable)" (see for loops below) is just a new refere
   <span class="o">-&gt;</span> <span class="n">a</span><span class="p">.</span><span class="n">one</span> <span class="o">=</span> <span class="mi">7</span> <span class="p">(</span><span class="n">because</span> <span class="n">we</span> <span class="n">have</span> <span class="n">accessed</span> <span class="n">the</span> <span class="s2">"</span><span class="s">one"</span> <span class="n">variable</span> <span class="ow">and</span> <span class="n">made</span> <span class="n">it</span> <span class="n">point</span> <span class="n">to</span> <span class="n">a</span> <span class="n">new</span> <span class="n">object</span><span class="p">)</span>
 </pre></div>
 
-<h3>
-<a name="default-parameters-for-functions" class="anchor" href="#default-parameters-for-functions"><span class="octicon octicon-link"></span></a>Default parameters for functions</h3>
+<h2>
+<a name="default-parameters-for-functions" class="anchor" href="#default-parameters-for-functions"><span class="octicon octicon-link"></span></a>Default parameters for functions</h2>
 
 <p>You can pass fewer parameters to a function than it expects, in which case the un-set ones ones will just be nil. You can use this to implement default parameters, but only for values at the end of the list.</p>
 
@@ -285,8 +282,8 @@ So "v" in "for k,v in pairs(myTable)" (see for loops below) is just a new refere
 <span class="k">end</span>
 </pre></div>
 
-<h3>
-<a name="variable-scope-local-vs-global" class="anchor" href="#variable-scope-local-vs-global"><span class="octicon octicon-link"></span></a>Variable Scope (local vs global)</h3>
+<h2>
+<a name="variable-scope-local-vs-global" class="anchor" href="#variable-scope-local-vs-global"><span class="octicon octicon-link"></span></a>Variable Scope (local vs global)</h2>
 
 <ul>
 <li>By default, all variables are global! This is unusual if you're coming from C, Python, etc.</li>
@@ -305,8 +302,8 @@ So "v" in "for k,v in pairs(myTable)" (see for loops below) is just a new refere
 <span class="kd">local</span> <span class="n">myScene</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createScene</span><span class="p">()</span> <span class="c1">-- myScene here is NOT the same "myScene" as the one above! This is a new local object!</span>
 </pre></div>
 
-<h3>
-<a name="destruction-and-garbage-collection" class="anchor" href="#destruction-and-garbage-collection"><span class="octicon octicon-link"></span></a>Destruction and garbage collection</h3>
+<h2>
+<a name="destruction-and-garbage-collection" class="anchor" href="#destruction-and-garbage-collection"><span class="octicon octicon-link"></span></a>Destruction and garbage collection</h2>
 
 <ul>
 <li>Lua has no explicit destructor for objects.</li>
@@ -320,8 +317,8 @@ So "v" in "for k,v in pairs(myTable)" (see for loops below) is just a new refere
 <ul>
 <li>Intro to GC: <a href="http://www.lua.org/manual/5.1/manual.html#2.10">http://www.lua.org/manual/5.1/manual.html#2.10</a>
 </li>
-</ul><h3>
-<a name="for-loops" class="anchor" href="#for-loops"><span class="octicon octicon-link"></span></a>For Loops</h3>
+</ul><h2>
+<a name="for-loops" class="anchor" href="#for-loops"><span class="octicon octicon-link"></span></a>For Loops</h2>
 
 <p>Lua provides 3 useful types of for loop:</p>
 
@@ -329,8 +326,8 @@ So "v" in "for k,v in pairs(myTable)" (see for loops below) is just a new refere
 <li>numeric - like a C for loop</li>
 <li>pairs - for looping through an arbitrary table</li>
 <li>ipairs - for looping through an "array" style table (see further down)</li>
-</ul><h4>
-<a name="numeric" class="anchor" href="#numeric"><span class="octicon octicon-link"></span></a>Numeric:</h4>
+</ul><h3>
+<a name="numeric" class="anchor" href="#numeric"><span class="octicon octicon-link"></span></a>Numeric:</h3>
 
 <div class="highlight highlight-lua"><pre><span class="k">for</span> <span class="n">var</span><span class="o">=</span><span class="n">exp1</span><span class="p">,</span> <span class="n">exp2</span><span class="p">,</span> <span class="n">exp3</span>
     <span class="k">do</span> <span class="n">something</span>
@@ -343,16 +340,16 @@ So "v" in "for k,v in pairs(myTable)" (see for loops below) is just a new refere
 <li>exp1/2/3 must all be integers.</li>
 <li>exp 3 is optional; defaults to 1.</li>
 <li>Don't change var during the loop! Behaviour is unpredictable.</li>
-<li>All three expressions are evaluated once, before the loop starts.
-e.g.
-<code>lua
-for n=5, math.min(somevalue, 0), -1 do
-print(n) --loop will run 5 times, math.min is called once
-end
-</code>
-</li>
-</ul><h4>
-<a name="pairs-generic-for-loop" class="anchor" href="#pairs-generic-for-loop"><span class="octicon octicon-link"></span></a>pairs (generic for loop):</h4>
+<li>All three expressions are evaluated once, before the loop starts.</li>
+</ul><p>Example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="k">for</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="nb">math.min</span><span class="p">(</span><span class="n">somevalue</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span> <span class="k">do</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="c1">--loop will run 5 times, math.min is called once</span>
+<span class="k">end</span>
+</pre></div>
+
+<h3>
+<a name="pairs-generic-for-loop" class="anchor" href="#pairs-generic-for-loop"><span class="octicon octicon-link"></span></a>pairs (generic for loop):</h3>
 
 <div class="highlight highlight-lua"><pre><span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="k">in</span> <span class="nb">pairs</span><span class="p">(</span><span class="n">myTable</span><span class="p">)</span>
     <span class="k">do</span> <span class="n">something</span>
@@ -364,8 +361,8 @@ end
 <li>"value" is optional (use "for key in pairs(..." if you only care about the key)</li>
 <li>The loop may go through keys in any arbitrary order. If your keys are 1,2,3,4, etc. they may not be accessed in that order!</li>
 <li>Use myTable.key= to change the table, not value= (see below)</li>
-</ul><h4>
-<a name="ipairs" class="anchor" href="#ipairs"><span class="octicon octicon-link"></span></a>ipairs:</h4>
+</ul><h3>
+<a name="ipairs" class="anchor" href="#ipairs"><span class="octicon octicon-link"></span></a>ipairs:</h3>
 
 <div class="highlight highlight-lua"><pre><span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="k">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">myArray</span><span class="p">)</span>
     <span class="k">do</span> <span class="n">something</span>
@@ -377,8 +374,8 @@ end
 <li>The loop goes from key=1, in order 2,3,4,etc till the last key that is not nil.</li>
 </ul><p>You can break out of a for loop with the "break" keyword. Sadly there is no "continue" keyword in Lua.</p>
 
-<h3>
-<a name="tables-as-arrays" class="anchor" href="#tables-as-arrays"><span class="octicon octicon-link"></span></a>Tables as "arrays"</h3>
+<h2>
+<a name="tables-as-arrays" class="anchor" href="#tables-as-arrays"><span class="octicon octicon-link"></span></a>Tables as "arrays"</h2>
 
 <p>Lua tables can be treated as arrays if the keys are all contiguous integers, starting from 1.</p>
 
@@ -405,8 +402,8 @@ mytable = {"hello", "value two", 7, 5, "another value"}
 
 <p>If you are adding and removing a lot of values in loops and don't care about the index value being a list of integers, I'd recommend just using a table with unique IDs as keys. That means you can add and remove from all over your code without fear of bugs.</p>
 
-<h3>
-<a name="tables-as-classes-and-the-hidden-self-parameter" class="anchor" href="#tables-as-classes-and-the-hidden-self-parameter"><span class="octicon octicon-link"></span></a>Tables as "classes" and the hidden "self" parameter</h3>
+<h2>
+<a name="tables-as-classes-and-the-hidden-self-parameter" class="anchor" href="#tables-as-classes-and-the-hidden-self-parameter"><span class="octicon octicon-link"></span></a>Tables as "classes" and the hidden "self" parameter</h2>
 
 <p>Lua functions can be passed an implicit "self" reference by declaring functions using the ":" operator as opposed to "."</p>
 
@@ -464,8 +461,8 @@ mytable = {"hello", "value two", 7, 5, "another value"}
 
 <p>NB: you can still call functions without the ":", in which case they expect self to be passed! This can lead to bugs, e.g. someObject.PrintSomeValueAndVal1(27) would result in self=27 and someValue=nil! Be aware of this generally when using . vs : with Quick's API. Getting an error with param = nil when you know you have passed the values expected is a typical indication of using . instead of :</p>
 
-<h3>
-<a name="including-code-from-other-files" class="anchor" href="#including-code-from-other-files"><span class="octicon octicon-link"></span></a>Including code from other files</h3>
+<h2>
+<a name="including-code-from-other-files" class="anchor" href="#including-code-from-other-files"><span class="octicon octicon-link"></span></a>Including code from other files</h2>
 
 <p>Use "doFile" to load and execute another file.</p>
 
@@ -479,29 +476,36 @@ mytable = {"hello", "value two", 7, 5, "another value"}
 
 <p>You can also use "require", which does the same thing but searches a list of paths and won't re-load code that has already been included with another require call. That makes it more like normal "library loading" and generally a better idea for large projects. See <a href="http://www.lua.org/pil/8.1.html">http://www.lua.org/pil/8.1.html</a></p>
 
-<h3>
-<a name="some-thoughts-on-lua-as-a-noob" class="anchor" href="#some-thoughts-on-lua-as-a-noob"><span class="octicon octicon-link"></span></a>Some Thoughts on Lua as a Noob</h3>
+<h2>
+<a name="some-thoughts-on-lua-as-a-noob" class="anchor" href="#some-thoughts-on-lua-as-a-noob"><span class="octicon octicon-link"></span></a>Some Thoughts on Lua as a Noob</h2>
 
 <p>As a big fan of Python (for non-gaming), I find Lua a little frustrating in that the syntax is so small. No +=, no built-in classes, no default parameters... Lua is not meant for throwing together a complex bit of hard-core data processing in a few lines! As a C person, I also wish I could control garbage collection better. However the "every variable is a reference; everything object is a string/number/function/table" simplicity of Lua is a breath of fresh air in terms of knowing exactly what's going on without having to understand any Lua internals at all. Once you get that and how to do pseudo-classes, you pretty much know everything about Lua! It's very easy in something like Python to get lost building a pass-by-value monster chunk of data that kills all your RAM. Lua objects are super-easy to visualise and it's pretty easy to produce fast, efficient code.</p>
 
 <p>Next time we'll be putting all that into practice building a real game. We'll see how Quick uses lua "classes" to implement it's "objects", "libraries" and "events" and how to best take advantage of Quick's node-based scene management.</p>
 
-<h2>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h2>
+<h1>
+<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h1>
 
 <p>The prototype and blog are both written by Nick Smith <a href="https://github.com/nickmarmalade" class="user-mention">@nickmarmalade</a>.</p>
-      </section>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/nickmarmalade/wrong-prototype/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/nickmarmalade/wrong-prototype/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/nickmarmalade/wrong-prototype"></a> is maintained by <a href="https://github.com/nickmarmalade">nickmarmalade</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
     </div>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">WRONG Prototype maintained by <a href="https://github.com/nickmarmalade">nickmarmalade</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
-    
-
+  
   </body>
 </html>
