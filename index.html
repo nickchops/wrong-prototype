@@ -31,10 +31,7 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h2>
-<a name="welcome-to-the-github-page-for-the-wrong-prototype" class="anchor" href="#welcome-to-the-github-page-for-the-wrong-prototype"><span class="octicon octicon-link"></span></a>Welcome to the GitHub page for The WRONG prototype</h2>
-
-<p>This repository contains the source for a prototype Marmalade Quick game.</p>
+        <p>This repository contains the source for a prototype Marmalade Quick game.</p>
 
 <p>It was built as part of a blog series on getting started with Marmalade Quick, by Marmalade employee (and owner of this github account) Nick Smith. Marmalade Quick is 2D rapid development middleware that ships with the Marmalade cross platform SDK. It allows you to code 2D games quickly using Lua and, combined with the regular Marmalade tools, lets you easily publish to mobile platforms, PC and Mac.</p>
 
@@ -72,14 +69,14 @@ So what does that mean in practice? Basically, you open the Launchpad, click "Ne
 
 <p>New users can sign up for free and use an eval license (eval licenses mean deployed apps will be watermarked and not valid for publishing). You can use Mac or PC for both Marmalade SDK and Quick and you can deploy to all standard platforms with either.</p>
 
-<p>(Quick is now bundled inside the regular Marmalade SDK and requires no additional setup steps)
-<del>Download Marmalade Quick for Windows or Mac from here:</del>
+<p><del>Download Marmalade Quick for Windows or Mac from here:</del>
 <del><a href="http://www.madewithmarmalade.com/quick">http://www.madewithmarmalade.com/quick</a></del>
-<del>Its a zip file, just extract it into the root folder of your 6.2 SDK. It's safe and only adds files (no overwriting). On Mac, make sure you <em>merge</em> folders instead of replacing them! (use terminal with "rsync -arvu " if needed)</del></p>
+<del>Its a zip file, just extract it into the root folder of your 6.2 SDK. It's safe and only adds files (no overwriting). On Mac, make sure you <em>merge</em> folders instead of replacing them! (use terminal with "rsync -arvu " if needed)</del>
+<strong>(Quick is now bundled inside the regular Marmalade SDK and requires no additional setup steps)</strong></p>
 
 <p>Documentation for Marmalade Quick is online here:
 <del><a href="http://quick-docs.madewithmarmalade.com">http://quick-docs.madewithmarmalade.com</a></del>
-(now at <a href="http://docs.madewithmarmalade.com/display/MD/Marmalade+Quick">http://docs.madewithmarmalade.com/display/MD/Marmalade+Quick</a>)</p>
+<strong>(now at <a href="http://docs.madewithmarmalade.com/display/MD/Marmalade+Quick">http://docs.madewithmarmalade.com/display/MD/Marmalade+Quick</a>)</strong></p>
 
 <p>We don't currently offer offline documentation, <del>but feel free to save them from the browser. Search will work without an Internet connection.</del></p>
 
@@ -98,7 +95,7 @@ So what does that mean in practice? Basically, you open the Launchpad, click "Ne
 
 <p>Follow the steps in A Quick App in 5 Minutes in the docs:
 <del><a href="http://quick-docs.madewithmarmalade.com/AQuickAppIn5Minutes.html">http://quick-docs.madewithmarmalade.com/AQuickAppIn5Minutes.html</a></del>
-(<a href="http://docs.madewithmarmalade.com/display/MD/A+Quick+App+in+5+Minutes">http://docs.madewithmarmalade.com/display/MD/A+Quick+App+in+5+Minutes</a>)</p>
+<strong>(<a href="http://docs.madewithmarmalade.com/display/MD/A+Quick+App+in+5+Minutes">http://docs.madewithmarmalade.com/display/MD/A+Quick+App+in+5+Minutes</a>)</strong></p>
 
 <p>I'll be walking through some real world code in the next few posts. For now, I'd encourage you to dive in and see what you can build! A good starting point is the examples in quick/data/examples (there's a lot more there than the ones listed by default in the Launchpad).</p>
 
@@ -117,7 +114,377 @@ Under Deploying, do "package" or "package and install" to put on device.
 Standard Deployment Tool settings are all documented here
 Note that Quick has not been well tested against the Marmalade 6.2 beta SDK for Windows Phone 8 and we are not officially supporting Quick on WP8 yet.</p>
 
-<p>(NB: From Marmalade 7.0, Quick uses the new Marmalade Hub GUI and supports most platforms out of the box. See <a href="http://docs.madewithmarmalade.com/display/MD/What+do+we+support">http://docs.madewithmarmalade.com/display/MD/What+do+we+support</a>)</p>
+<p><strong>(NB: From Marmalade 7.0, Quick uses the new Marmalade Hub GUI and supports most platforms out of the box. See <a href="http://docs.madewithmarmalade.com/display/MD/What+do+we+support">http://docs.madewithmarmalade.com/display/MD/What+do+we+support</a>)</strong></p>
+
+<h2>
+<a name="building-a-marmalade-quick-game-with-nick-smith-part-2-getting-to-grips-with-lua" class="anchor" href="#building-a-marmalade-quick-game-with-nick-smith-part-2-getting-to-grips-with-lua"><span class="octicon octicon-link"></span></a>Building a Marmalade Quick Game with Nick Smith, part 2: Getting to Grips with Lua</h2>
+
+<p>I'll preface this post by saying that I'm mostly a C++ and Python developer these days. I first used Quick when the alpha release came out and only seriously dove into it over Christmas. Before Quick, I had only ever used Lua to set a few values in scripts for games and had basically no concept of how it actually works; most "issues" I encountered getting to grips with Quick, were actually just getting to grips with Lua!The way I talk about Lua objects and behaviour here is also going to be coloured heavily by my use of C++ and object oriented (OO) programming, so I will definitely be misusing technical terms as much as I possible can. As a first step for users who are new to Lua, I very much recommend that you understand how it handles objects/values, specifically the way that everything is a reference and everything is global by default. With that in mind, for this post I'm going to skip Quick almost entirely and kick off with an idiots guide to Lua.</p>
+
+<h3>
+<a name="whitespace-and-block-endings" class="anchor" href="#whitespace-and-block-endings"><span class="octicon octicon-link"></span></a>Whitespace and block endings</h3>
+
+<ul>
+<li>Lua uses whitespace only to separate API calls. Unlike Python for example, indentation is irrelevant and only used to make code readable.</li>
+<li>Lua does not have any end-of-line characters (like semicolons in C/Java)</li>
+<li>Code blocks such as if statements, functions and for loops use the "end" keyword to enclose their content</li>
+</ul><p>Example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="k">function</span> <span class="nf">MyFunction</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="mi">5</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="k">then</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="s">value &gt; 20"</span><span class="p">)</span>
+    <span class="k">elseif</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">10</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="s">value &gt; 10"</span><span class="p">)</span>
+    <span class="k">end</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="k">then</span> <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="s">value is "</span> <span class="o">..</span> <span class="n">value</span><span class="p">)</span> <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>Tip: Concatenate strings and numbers using '..' as above.</p>
+
+<h3>
+<a name="comments" class="anchor" href="#comments"><span class="octicon octicon-link"></span></a>Comments</h3>
+
+<ul>
+<li>Comments are any text following two hyphens (--) in a line.</li>
+<li>Multi-line comments start with --[[ and end with ]]--</li>
+</ul><h3>
+<a name="lua-is-small" class="anchor" href="#lua-is-small"><span class="octicon octicon-link"></span></a>Lua is small!</h3>
+
+<ul>
+<li>There are no classes, private/public, queues or other fancy data types, etc.</li>
+<li>Implement them yourself! Or better, find a module from the web.</li>
+<li>Lua has no +=, ++, etc. operators or any shorthand notation. Ctrl-C/V is your friend!</li>
+</ul><h3>
+<a name="value-types" class="anchor" href="#value-types"><span class="octicon octicon-link"></span></a>Value types</h3>
+
+<p>Lua only provides the following types:</p>
+
+<ul>
+<li>floating point numbers - there is no integer type and no concept of short vs long, float vs double, etc. Just write the number to declare it</li>
+<li>strings - just declare using value="my string here"</li>
+<li>tables (access a group of value by keys)</li>
+<li>functions</li>
+<li>true &amp; false</li>
+<li>nil - no object, like null or nil in other languages</li>
+<li>Tables</li>
+<li>Tables store values (numbers/strings/functions/tables) which are indexed by keys. A key can be any Lua type (string/number/function/table).</li>
+</ul><p>Example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">mytable</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">--empty table</span>
+<span class="n">mytable</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"</span><span class="s">hello"</span><span class="p">,</span> <span class="s2">"</span><span class="s">value two"</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">"</span><span class="s">another value"</span><span class="p">}</span><span class="c1">--table initialised with values - no specified keys means keys are auto-assigned numbers starting at 1 (1,2,3,4, etc)</span>
+<span class="n">mytable2</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"</span><span class="s">bob"</span><span class="p">,</span> <span class="n">age</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="s2">"</span><span class="s">orange"</span><span class="p">}</span> <span class="c1">--special case: you can initialise values with string keys like this.</span>
+</pre></div>
+
+<p>You can access table values as follows:</p>
+
+<div class="highlight highlight-lua"><pre><span class="nb">print</span><span class="p">(</span><span class="n">mytable</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1">--prints hello</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mytable</span><span class="p">[</span><span class="s2">"</span><span class="s">age"</span><span class="p">])</span> <span class="c1">--prints 20</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mytable</span><span class="p">.</span><span class="n">age</span><span class="p">)</span> <span class="c1">--prints 20</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mytable</span><span class="mf">.1</span><span class="p">)</span> <span class="c1">--error! can't use numbers with the dot operator</span>
+</pre></div>
+
+<p>Dynamic assignment:</p>
+
+<ul>
+<li>Variable types are dynamic, so you can do things like:
+<code>lua
+a=1 then a="string" then a = {} then a = myFunction()...end
+</code>
+</li>
+</ul><h3>
+<a name="nil" class="anchor" href="#nil"><span class="octicon octicon-link"></span></a>nil</h3>
+
+<ul>
+<li>You can include an undeclared variable in your code and instead of causing an error/exception, it will just evaluate to nil.</li>
+<li>In conditionals (if, while, etc), nil evaluates to false.</li>
+<li>Unlike in C, zero is <em>not</em> equivalent to false, so "if 0" evaluates to true.</li>
+</ul><h3>
+<a name="functions" class="anchor" href="#functions"><span class="octicon octicon-link"></span></a>Functions</h3>
+
+<ul>
+<li>Functions objects are declared with the "function" keyword and a parameter list in parentheses "()".</li>
+<li>A function with parentheses in your code calls the function.</li>
+<li>Specifying it without parentheses treats it as a value that is passed by reference like other objects (see further down).</li>
+<li>Parameters are local variables pointing to the object passed to the function (ditto).</li>
+</ul><p>Example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="k">function</span> <span class="nf">myFunction</span><span class="p">(</span><span class="n">someValue</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">someValue</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">myVar</span> <span class="o">=</span> <span class="n">myFunction</span>
+    <span class="n">myVar</span><span class="p">(</span><span class="s2">"</span><span class="s">hello"</span><span class="p">)</span> <span class="c1">--prints "hello"</span>
+    <span class="n">anotherVar</span> <span class="o">=</span> <span class="n">myVar</span>
+    <span class="n">anotherVar</span><span class="p">(</span><span class="s2">"</span><span class="s">goodbye"</span><span class="p">)</span>
+
+<span class="n">myTable</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">myTable</span><span class="p">.</span><span class="n">memberFunction</span> <span class="o">=</span> <span class="k">function</span><span class="p">()</span>
+    <span class="c1">--do something here</span>
+<span class="k">end</span>
+</pre></div>
+
+<h3>
+<a name="references-and-values" class="anchor" href="#references-and-values"><span class="octicon octicon-link"></span></a>References and values</h3>
+
+<ul>
+<li>Everything in Lua is an object</li>
+<li>Variables are all references that point at these objects, so all variable assignments are by reference!</li>
+<li>Strings and numbers are essentially immutable objects, so when you do myVariable="mystring" you are essentially saying "create an object, 'mystring'" and "myVariable is a pointer to that object".</li>
+<li>If you have two variables referring to the same string and set the first variable to another string, it wont change the second variable; they are now pointing to different strings.</li>
+<li>Think of every unique number or string as a new object defined somewhere inside Lua.</li>
+<li>This is why you can use a string as a key in a table and not worry about the key itself changing.</li>
+</ul><p>Example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">a</span><span class="o">=</span><span class="mi">5</span>
+<span class="n">b</span><span class="o">=</span><span class="n">a</span>
+<span class="n">c</span><span class="o">=</span><span class="mi">7</span>
+  <span class="o">-&gt;</span> <span class="n">a</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">7</span> <span class="p">(</span><span class="n">a</span> <span class="ow">and</span> <span class="n">b</span> <span class="n">are</span> <span class="n">references</span> <span class="n">to</span> <span class="n">same</span> <span class="n">number</span><span class="err">!</span><span class="p">)</span>
+
+<span class="n">a</span><span class="o">=</span><span class="mi">2</span>
+  <span class="o">-&gt;</span> <span class="n">a</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">7</span> <span class="p">(</span><span class="n">we</span><span class="s1">'</span><span class="s">re not changing the value of a number when we change a! b still points to the object "5")</span>
+
+<span class="n">a</span><span class="o">=</span><span class="s2">"</span><span class="s">a string"</span>
+<span class="n">b</span><span class="o">=</span><span class="n">a</span>
+  <span class="o">-&gt;</span> <span class="n">a</span><span class="o">=</span><span class="s2">"</span><span class="s">a string"</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">"</span><span class="s">a string"</span> <span class="p">(</span><span class="n">both</span> <span class="n">variables</span> <span class="n">are</span> <span class="n">references</span> <span class="n">to</span> <span class="n">same</span> <span class="n">string</span> <span class="n">object</span><span class="p">)</span>
+
+<span class="n">a</span><span class="o">=</span><span class="s2">"</span><span class="s">another string"</span>
+  <span class="o">-&gt;</span> <span class="n">a</span><span class="o">=</span><span class="s2">"</span><span class="s">another string"</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="s2">"</span><span class="s">a string"</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="p">{</span> <span class="n">key1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">key2</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">key3</span><span class="o">=</span><span class="s2">"</span><span class="s">hello"</span> <span class="p">}</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span>
+  <span class="o">-&gt;</span> <span class="n">b</span> <span class="err">&amp;</span> <span class="n">a</span> <span class="n">refer</span> <span class="n">to</span> <span class="n">same</span> <span class="n">object</span>
+
+<span class="n">a</span><span class="p">.</span><span class="n">key1</span> <span class="o">=</span> <span class="s2">"</span><span class="s">new value"</span>
+  <span class="o">-&gt;</span> <span class="n">b</span><span class="p">.</span><span class="n">key1</span> <span class="o">=</span> <span class="s2">"</span><span class="s">new value"</span>
+</pre></div>
+
+<p>When using things like function declarations and for loops, bear in mind that you are assigning by reference still and the parameters in those are all new <em>local</em> variables pointing to some object.
+So "v" in "for k,v in pairs(myTable)" (see for loops below) is just a new reference to the object myTable[k] points to. Doing v=newValue wont change the object in the table (myTable[k] will still return the old value), but both v &amp; myTable[k] will return a pointer to the same object.</p>
+
+<p>However, for tables, you can change the values <em>inside</em> a table since they are also references:</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">a</span> <span class="o">=</span> <span class="p">{</span><span class="n">one</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">two</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">three</span><span class="o">=</span><span class="mi">3</span><span class="p">}</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span>
+<span class="n">b</span><span class="p">.</span><span class="n">one</span><span class="o">=</span><span class="mi">7</span>
+  <span class="o">-&gt;</span> <span class="n">a</span><span class="p">.</span><span class="n">one</span> <span class="o">=</span> <span class="mi">7</span> <span class="p">(</span><span class="n">because</span> <span class="n">we</span> <span class="n">have</span> <span class="n">accessed</span> <span class="n">the</span> <span class="s2">"</span><span class="s">one"</span> <span class="n">variable</span> <span class="ow">and</span> <span class="n">made</span> <span class="n">it</span> <span class="n">point</span> <span class="n">to</span> <span class="n">a</span> <span class="n">new</span> <span class="n">object</span><span class="p">)</span>
+</pre></div>
+
+<h3>
+<a name="default-parameters-for-functions" class="anchor" href="#default-parameters-for-functions"><span class="octicon octicon-link"></span></a>Default parameters for functions</h3>
+
+<p>You can pass fewer parameters to a function than it expects, in which case the un-set ones ones will just be nil. You can use this to implement default parameters, but only for values at the end of the list.</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">myFunction</span> <span class="o">=</span> <span class="k">function</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span><span class="n">v2</span><span class="p">,</span><span class="n">v3</span><span class="p">,</span><span class="n">v4</span><span class="p">,</span><span class="n">v5</span><span class="p">)</span>
+    <span class="n">v4</span> <span class="o">=</span> <span class="n">v4</span> <span class="ow">or</span> <span class="mi">100</span> <span class="c1">--default to 100 if nil</span>
+    <span class="n">v5</span> <span class="o">=</span> <span class="n">v5</span> <span class="ow">or</span> <span class="s2">"</span><span class="s">something"</span>
+    <span class="o">...</span>
+<span class="k">end</span>
+</pre></div>
+
+<h3>
+<a name="variable-scope-local-vs-global" class="anchor" href="#variable-scope-local-vs-global"><span class="octicon octicon-link"></span></a>Variable Scope (local vs global)</h3>
+
+<ul>
+<li>By default, all variables are global! This is unusual if you're coming from C, Python, etc.</li>
+<li>If you have two (global) variables of the same name in different functions, they will point to the same object.</li>
+<li>You have to explicitly use the "local" keyword to declare a variable local.</li>
+</ul><p>This is a typical place to create buggy code! Bear local vs global and code order in mind if you get errors like "value is nil" or you expect an event function to be called and nothing happens.</p>
+
+<p>A common error I've seen is having a local-declared Quick scene object and having a global function for that object, but the function is declared first so Lua thinks the local object is different to the global similarly-named one...</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="k">function</span> <span class="nf">myScene</span><span class="p">:</span><span class="n">setUp</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="o">...</span>
+<span class="k">end</span>
+
+<span class="kd">local</span> <span class="n">myScene</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createScene</span><span class="p">()</span> <span class="c1">-- myScene here is NOT the same "myScene" as the one above! This is a new local object!</span>
+</pre></div>
+
+<h3>
+<a name="destruction-and-garbage-collection" class="anchor" href="#destruction-and-garbage-collection"><span class="octicon octicon-link"></span></a>Destruction and garbage collection</h3>
+
+<ul>
+<li>Lua has no explicit destructor for objects.</li>
+<li>The "nil" operator is similar to null in other languages.</li>
+<li>Lua garbage-collects objects when there are no longer any active references to them.</li>
+<li>To make sure there are no references to an object, set all variables that pointed to the object to be nil.</li>
+<li>Lua uses incremental mark and sweep garbage collection.</li>
+<li>By default, garbage collection runs at some interval which is not opaque to the user.</li>
+</ul><p>Background reading:</p>
+
+<ul>
+<li>Intro to GC: <a href="http://www.lua.org/manual/5.1/manual.html#2.10">http://www.lua.org/manual/5.1/manual.html#2.10</a>
+</li>
+</ul><h3>
+<a name="for-loops" class="anchor" href="#for-loops"><span class="octicon octicon-link"></span></a>For Loops</h3>
+
+<p>Lua provides 3 useful types of for loop:</p>
+
+<ul>
+<li>numeric - like a C for loop</li>
+<li>pairs - for looping through an arbitrary table</li>
+<li>ipairs - for looping through an "array" style table (see further down)</li>
+</ul><h4>
+<a name="numeric" class="anchor" href="#numeric"><span class="octicon octicon-link"></span></a>Numeric:</h4>
+
+<div class="highlight highlight-lua"><pre><span class="k">for</span> <span class="n">var</span><span class="o">=</span><span class="n">exp1</span><span class="p">,</span> <span class="n">exp2</span><span class="p">,</span> <span class="n">exp3</span>
+    <span class="k">do</span> <span class="n">something</span>
+<span class="k">end</span>
+</pre></div>
+
+<ul>
+<li>var is a local variable that only exists in the loop.</li>
+<li>var starts at exp1, increments by exp3, loop ends when var &gt; exp2</li>
+<li>exp1/2/3 must all be integers.</li>
+<li>exp 3 is optional; defaults to 1.</li>
+<li>Don't change var during the loop! Behaviour is unpredictable.</li>
+<li>All three expressions are evaluated once, before the loop starts.
+e.g.
+<code>lua
+for n=5, math.min(somevalue, 0), -1 do
+print(n) --loop will run 5 times, math.min is called once
+end
+</code>
+</li>
+</ul><h4>
+<a name="pairs-generic-for-loop" class="anchor" href="#pairs-generic-for-loop"><span class="octicon octicon-link"></span></a>pairs (generic for loop):</h4>
+
+<div class="highlight highlight-lua"><pre><span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="k">in</span> <span class="nb">pairs</span><span class="p">(</span><span class="n">myTable</span><span class="p">)</span>
+    <span class="k">do</span> <span class="n">something</span>
+<span class="k">end</span>
+</pre></div>
+
+<ul>
+<li>As above, variables are local to the loop and pairs is only run once</li>
+<li>"value" is optional (use "for key in pairs(..." if you only care about the key)</li>
+<li>The loop may go through keys in any arbitrary order. If your keys are 1,2,3,4, etc. they may not be accessed in that order!</li>
+<li>Use myTable.key= to change the table, not value= (see below)</li>
+</ul><h4>
+<a name="ipairs" class="anchor" href="#ipairs"><span class="octicon octicon-link"></span></a>ipairs:</h4>
+
+<div class="highlight highlight-lua"><pre><span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="k">in</span> <span class="nb">ipairs</span><span class="p">(</span><span class="n">myArray</span><span class="p">)</span>
+    <span class="k">do</span> <span class="n">something</span>
+<span class="k">end</span>
+</pre></div>
+
+<ul>
+<li>As above but designed for tables that are "arrays" (keys are ordered integers starting at 1 - see below).</li>
+<li>The loop goes from key=1, in order 2,3,4,etc till the last key that is not nil.</li>
+</ul><p>You can break out of a for loop with the "break" keyword. Sadly there is no "continue" keyword in Lua.</p>
+
+<h3>
+<a name="tables-as-arrays" class="anchor" href="#tables-as-arrays"><span class="octicon octicon-link"></span></a>Tables as "arrays"</h3>
+
+<p>Lua tables can be treated as arrays if the keys are all contiguous integers, starting from 1.</p>
+
+<ul>
+<li>Lua arrays start at 1 not zero!</li>
+<li>You can initialise an array easily by not specifying keys, as in our earlier example:
+<code>lua
+mytable = {"hello", "value two", 7, 5, "another value"}
+</code>
+</li>
+<li>Get the length of an array using table.getn(myTable). NB: "table" is a global object with various helper functions for other tables</li>
+<li>The length of an array is defined as the last integer index, starting at 1, which does not have a value of nil.</li>
+<li>Therefore, if you set a value in the middle of the array to nil then the rest of the array is then ignored in subsequent for ipairs() loops and table.getn() becomes unpredictable!</li>
+</ul><p>Changing arrays:</p>
+
+<ul>
+<li>Arrays are dynamic (as they are tables) so you can add and remove values.</li>
+<li>Add to an array using table.insert(myTable, value, )</li>
+<li>Remove from an array using table.remove(myTable, )</li>
+<li>Using .remove makes the table automatically fill the hole by moving other values down one index. Using myTable[index] = nil will NOT make the table re-size (actually it may depending on Lua implementation but it's not guaranteed so don't do it!).</li>
+<li>Warning! The value returned by table.getn() is updated when you do inserts, but not removes!</li>
+<li>If you set the LAST element to nil, then the array WILL "shrink" inside for ipairs() loops, but the behaviour of table.getn() isn't guaranteed.</li>
+</ul><p>Sounds bug-friendly, right? It's probably safer to track dynamic array sizes yourself with a custom variable than to use table.getn().</p>
+
+<p>If you are adding and removing a lot of values in loops and don't care about the index value being a list of integers, I'd recommend just using a table with unique IDs as keys. That means you can add and remove from all over your code without fear of bugs.</p>
+
+<h3>
+<a name="tables-as-classes-and-the-hidden-self-parameter" class="anchor" href="#tables-as-classes-and-the-hidden-self-parameter"><span class="octicon octicon-link"></span></a>Tables as "classes" and the hidden "self" parameter</h3>
+
+<p>Lua functions can be passed an implicit "self" reference by declaring functions using the ":" operator as opposed to "."</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">Simple</span> <span class="k">function</span><span class="err">:</span>
+<span class="nf">myObject</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">myObject</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"</span><span class="s">bob"</span>
+<span class="n">myObject</span><span class="p">.</span><span class="n">myFunction</span> <span class="o">=</span> <span class="k">function</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="s">value"</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">myObject</span><span class="p">.</span><span class="n">myFunction</span><span class="p">(</span><span class="s2">"</span><span class="s">hello"</span><span class="p">)</span>
+<span class="s2">"</span><span class="s">:"</span> <span class="n">version</span><span class="p">:</span>
+<span class="n">myObject</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">myObject</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"</span><span class="s">bob"</span>
+<span class="n">myObject</span><span class="p">:</span><span class="n">myFunction</span> <span class="o">=</span> <span class="k">function</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="s">value, my name is "</span> <span class="o">..</span> <span class="n">self</span><span class="p">.</span><span class="n">name</span><span class="p">)</span> <span class="c1">-- we can access the table that owns this function using "self"</span>
+<span class="k">end</span>
+
+<span class="n">myObject</span><span class="p">:</span><span class="n">myFunction</span><span class="p">(</span><span class="s2">"</span><span class="s">hello"</span><span class="p">)</span> <span class="c1">-- now prints "hello, my name is bob"</span>
+</pre></div>
+
+<p>This is used a lot in Marmalade Quick, e.g. the event functions for scenes.</p>
+
+<p>We can take advantage of this to create "classes" and do proper Object-Oriented (OO) coding. This is pretty fundamental if you want to have dynamically-created objects and to get access to objects from events. Note that there is no actual Lua concept of a "class", we are inventing it here!</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">MyClass</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">--declare a global table that will "create" objects of this "class" for us</span>
+<span class="n">MyClass</span><span class="p">.</span><span class="n">__index</span> <span class="o">=</span> <span class="n">MyClass</span> <span class="c1">-- .__index uses Lua's "metatable" feature to allow one table to use functions and values from another</span>
+<span class="c1">-- a global function to create objects (tables) that all have the values and classes of MyClass</span>
+<span class="k">function</span> <span class="nc">MyClass</span><span class="p">.</span><span class="nf">Create</span><span class="p">(</span><span class="n">someInitialiserValue</span><span class="p">,</span> <span class="n">anotherInitialiser</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">myObject</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">-- create object</span>
+    <span class="nb">setmetatable</span><span class="p">(</span><span class="n">myObject</span><span class="p">,</span><span class="n">MyClass</span><span class="p">)</span> <span class="c1">-- give access to MyClass members</span>
+    <span class="n">myObject</span><span class="p">.</span><span class="n">val1</span> <span class="o">=</span> <span class="n">someInitialiserValue</span>
+    <span class="n">myObject</span><span class="p">.</span><span class="n">val2</span> <span class="o">=</span> <span class="n">anotherInitialiser</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">MyClass</span><span class="p">:</span><span class="n">PrintSomeValueAndVal1</span><span class="p">(</span><span class="n">someValue</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">someValue</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">:</span><span class="n">PrintVal1</span><span class="p">()</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">MyClass</span><span class="p">:</span><span class="n">PrintVal1</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">val1</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">someObject</span> <span class="o">=</span> <span class="n">MyClass</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">someObject</span><span class="p">:</span><span class="n">PrintSomeValueAndVal1</span><span class="p">(</span><span class="mi">27</span><span class="p">)</span>
+
+<span class="n">secondObject</span> <span class="o">=</span> <span class="n">MyClass</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">secondObject</span><span class="p">.</span><span class="n">val2</span><span class="p">)</span> <span class="c1">-- can access members still like any table</span>
+</pre></div>
+
+<p>NB: you can still call functions without the ":", in which case they expect self to be passed! This can lead to bugs, e.g. someObject.PrintSomeValueAndVal1(27) would result in self=27 and someValue=nil! Be aware of this generally when using . vs : with Quick's API. Getting an error with param = nil when you know you have passed the values expected is a typical indication of using . instead of :</p>
+
+<h3>
+<a name="including-code-from-other-files" class="anchor" href="#including-code-from-other-files"><span class="octicon octicon-link"></span></a>Including code from other files</h3>
+
+<p>Use "doFile" to load and execute another file.</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">doFile</span><span class="p">(</span><span class="s2">"</span><span class="s">path/to/otherfile.lua"</span><span class="p">)</span>
+</pre></div>
+
+<p>This is the same as just substituting the doFile statement with the contents of the other file. So, if otherfile has a "return" statement at the end, you can do:</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">myValue</span> <span class="o">=</span> <span class="n">doFile</span><span class="p">(</span><span class="s2">"</span><span class="s">path/to/otherfile.lua"</span><span class="p">)</span>
+</pre></div>
+
+<p>You can also use "require", which does the same thing but searches a list of paths and won't re-load code that has already been included with another require call. That makes it more like normal "library loading" and generally a better idea for large projects. See <a href="http://www.lua.org/pil/8.1.html">http://www.lua.org/pil/8.1.html</a></p>
+
+<h3>
+<a name="some-thoughts-on-lua-as-a-noob" class="anchor" href="#some-thoughts-on-lua-as-a-noob"><span class="octicon octicon-link"></span></a>Some Thoughts on Lua as a Noob</h3>
+
+<p>As a big fan of Python (for non-gaming), I find Lua a little frustrating in that the syntax is so small. No +=, no built-in classes, no default parameters... Lua is not meant for throwing together a complex bit of hard-core data processing in a few lines! As a C person, I also wish I could control garbage collection better. However the "every variable is a reference; everything object is a string/number/function/table" simplicity of Lua is a breath of fresh air in terms of knowing exactly what's going on without having to understand any Lua internals at all. Once you get that and how to do pseudo-classes, you pretty much know everything about Lua! It's very easy in something like Python to get lost building a pass-by-value monster chunk of data that kills all your RAM. Lua objects are super-easy to visualise and it's pretty easy to produce fast, efficient code.</p>
+
+<p>Next time we'll be putting all that into practice building a real game. We'll see how Quick uses lua "classes" to implement it's "objects", "libraries" and "events" and how to best take advantage of Quick's node-based scene management.</p>
 
 <h2>
 <a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h2>
