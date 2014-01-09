@@ -8,7 +8,13 @@ Marmalade Quick is a 2D rapid app dev toolkit that runs on top of the Marmalade 
 
 You need a Marmalade license to build the code as-is and to deploy to devices. Wrong should build and run on any device that supports Quick (Android, iOS, BlackBerry 10, PlayBook, PC and Mac desktop)
 
-This prototype version was built to accompany a set of tutorial blogs from the Marmalade developer website. The code here is from part 3 of the blog posts that start here:
+This prototype version was built to accompany a set of tutorial blogs from the Marmalade developer website. The code here is from part 3 of the blog posts.
+
+See the Github page for more info and a complete up-dated reproduction of the original blog posts:
+
+   http://nickmarmalade.github.io/wrong-prototype/
+
+Those original blog posts started here:
    www.madewithmarmalade.com/blog/building-marmalade-quick-game-nick-smith-part-1-getting-started
 
 A more advanced version Wrong (v 0.7) is available on the BlackBerry World store for BB10 as a proof of concept.
@@ -16,7 +22,7 @@ A more advanced version Wrong (v 0.7) is available on the BlackBerry World store
 
 Wrong v1 will be uploaded to a whole bunch of stores and github when ready along with accompanying blog posts.
 
-Wrong is provided under the MIT license:
+WRONG prototype is provided under the MIT license:
 
 /*
  * (C) 2012-2013 Nick Smith.
