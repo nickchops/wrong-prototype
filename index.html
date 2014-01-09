@@ -484,6 +484,513 @@ mytable = {"hello", "value two", 7, 5, "another value"}
 <p>Next time we'll be putting all that into practice building a real game. We'll see how Quick uses lua "classes" to implement it's "objects", "libraries" and "events" and how to best take advantage of Quick's node-based scene management.</p>
 
 <h1>
+<a name="building-a-marmalade-quick-game-pt-3-building-the-wrong-prototype" class="anchor" href="#building-a-marmalade-quick-game-pt-3-building-the-wrong-prototype"><span class="octicon octicon-link"></span></a>Building a Marmalade Quick Game pt 3: Building the "Wrong" Prototype</h1>
+
+<p>Having played around briefly with the Quick examples, I decided to go straight for building a game and to figure out the rest on the way. I wanted something with some simple controls and screens that I could build on and polish later. I recently unearthed a very old nameless pong clone that I'd built in an old visual game maker app a very long time ago. It's basically pong with weapons, but backwards as you have to avoid the balls. I've decided to resurrect and improve my little reverse-pong game, now official know as "Wrong" (Weaponified Reverse pONG!) I'll be re-building Wrong from scratch and adding new features as I go. These blog posts will include code snippets that you can steal and learn from. At the end I'll upload to iOS, Android, BlackBerry and Windows Phone 8 stores, plus put the full source code up on GitHub.</p>
+
+<p>The screen below gives you and idea of the original looked:
+<img src="http://i1353.photobucket.com/albums/q663/GazDeaves/protowrong_zps20a235a9.png" alt="original game screenshot"></p>
+
+<p>Be warned that the final version is not gonna look quite like that!</p>
+
+<p>To implement Wrong, we basically need:</p>
+
+<ul>
+<li>a background image</li>
+<li>objects for the player "sleds"</li>
+<li>ball objects</li>
+<li>counters for health</li>
+<li>counters, icons and objects for all the weapons</li>
+<li>controls to move the players</li>
+<li>logic for ball and weapon movement, bouncing and collision detection for hitting players</li>
+<li>health, weapon firing and power-up logic</li>
+<li>lots of simple animations for impacts etc.</li>
+<li>menus and battle setup logic</li>
+</ul><p>Importantly, we also need to put some thought into adapting the game for modern devices:</p>
+
+<ul>
+<li>The original version was fixed at 640x480 fullscreen for PC; the new one needs to run on phones and tablets in all sorts of resolutions and aspect ratios (just take a look at <a href="http://en.wikipedia.org/wiki/Comparison_of_Android_devices">http://en.wikipedia.org/wiki/Comparison_of_Android_devices</a> !!).</li>
+<li>The original was 2 player only, on a single device; the new one probably ought to have some one player and networked play options (two players on one phone? Not likely!).</li>
+<li>The original was controlled by each player having keyboard keys for up, down, fire and a separate key to select each weapon; the new one will need to support touch-only interfaces.</li>
+<li>The original graphics are nice in an amateur pixel art kind of way; I want something a little more polished and memorable.</li>
+</ul><p>Initially, I just needed a prototype and to keep it simple, so I decided to skip weapons and controls for player 2, plus stick with single-touch controls and keep the menu super-minimal. This will be a learning experience; we want to get something off the ground, see what Quick is capable of and then make some design decisions based on that before doing any serious coding.
+I ripped the graphics files out of the original to get some art to work with, though at the prototype stage I'll be using some vectors to avoid wasting time polishing bitmaps that will probably not make it into the final build anyway. I'm also starting with little in the way of animation, but will build on that later.</p>
+
+<h2>
+<a name="creating-scenes-and-a-background" class="anchor" href="#creating-scenes-and-a-background"><span class="octicon octicon-link"></span></a>Creating scenes and a background</h2>
+
+<p>I'm including all the source and steps for the prototype build. Feel free to follow along.</p>
+
+<p>Starting a new project:
+1. Open /quick/tool/quickLaunchPad.exe/app
+1. Create a New Project
+1. Click "Open Folder" to get to the project source
+1. All assets including the Lua source live in "resources" by default, so open that folder.</p>
+
+<p>NB: by default quick will package <em>all</em> files in that folder into your app when you deploy to device. Exisiting Marmalade users will notice that it's included in the project's "assets" block. If you're new to Marmalade we'll cover that stuff at a later date.</p>
+
+<p>I'm going to use backdrop.png (ripped from my old game) so I've put that in resources/textures. To get started, edit main.lua (I recommend Notepad++ or the ZeroBrane Lua editor). This is the default main code file for Marmalade Quick.</p>
+
+<div class="highlight highlight-lua"><pre><span class="c1">-- app globals</span>
+<span class="n">appWidth</span> <span class="o">=</span> <span class="n">director</span><span class="p">.</span><span class="n">displayWidth</span>
+<span class="n">appHeight</span> <span class="o">=</span> <span class="n">director</span><span class="p">.</span><span class="n">displayHeight</span>
+<span class="n">battleCount</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1">-- Main menu --------------------------------------------------------------------</span>
+
+<span class="n">sceneMainMenu</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createScene</span><span class="p">()</span> <span class="c1">--this becomes the current scene automatically</span>
+
+<span class="k">function</span> <span class="nf">sceneMainMenu</span><span class="p">:</span><span class="n">setUp</span><span class="p">(</span><span class="n">event</span><span class="p">)</span> <span class="c1">-- declare a member functions of the scene object</span>
+    <span class="n">dbg</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s2">"</span><span class="s">sceneMainMenu:setUp"</span><span class="p">)</span>
+
+    <span class="c1">-- adding a label as member of the scene itself allows us to manage it easily</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createLabel</span><span class="p">({</span><span class="n">x</span><span class="o">=</span><span class="n">appWidth</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">appHeight</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"</span><span class="s">Main Menu"</span><span class="p">})</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">label</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">label</span><span class="p">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">label</span><span class="p">.</span><span class="n">xText</span><span class="o">/</span><span class="mi">2</span>
+<span class="k">end</span>
+<span class="k">function</span> <span class="nf">sceneMainMenu</span><span class="p">:</span><span class="n">tearDown</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="n">dbg</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s2">"</span><span class="s">sceneMainMenu:tearDown"</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">label</span> <span class="o">=</span> <span class="kc">nil</span> <span class="c1">-- good practice to nil unused objects</span>
+<span class="k">end</span>
+
+<span class="n">sceneMainMenu</span><span class="p">:</span><span class="n">addEventListener</span><span class="p">({</span><span class="s2">"</span><span class="s">setUp"</span><span class="p">,</span> <span class="s2">"</span><span class="s">tearDown"</span><span class="p">},</span> <span class="n">sceneMainMenu</span><span class="p">)</span>
+
+<span class="c1">-- battle screen -------------------------------------------------------</span>
+
+<span class="n">sceneBattle</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createScene</span><span class="p">()</span>
+<span class="k">function</span> <span class="nf">sceneBattle</span><span class="p">:</span><span class="n">setUp</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="n">dbg</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s2">"</span><span class="s">sceneBattle:setUp"</span><span class="p">)</span>
+
+    <span class="c1">-- director:create makes the current scene the parent node. The scene keeps a reference to its children.</span>
+    <span class="c1">-- director's coordinates (x=,y=) are relative to the parent, i.e. the scene in this case which always</span>
+    <span class="c1">-- has (0,0) at the bottom left of the screen</span>
+    <span class="n">background</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createSprite</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"</span><span class="s">textures/backdrop.png"</span><span class="p">)</span> <span class="c1">--file paths are relative to the root of the "resources" folder</span>
+
+    <span class="c1">-- debug label to check we're in right scene!</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createLabel</span><span class="p">({</span><span class="n">x</span><span class="o">=</span><span class="n">appWidth</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"</span><span class="s">Battle "</span> <span class="o">..</span> <span class="n">battleCount</span><span class="p">})</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">label</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">label</span><span class="p">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">self</span><span class="p">.</span><span class="n">label</span><span class="p">.</span><span class="n">xText</span><span class="o">/</span><span class="mi">2</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">sceneBattle</span><span class="p">:</span><span class="n">tearDown</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="n">dbg</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s2">"</span><span class="s">sceneBattle:tearDown"</span><span class="p">)</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">label</span> <span class="o">=</span> <span class="kc">nil</span>
+
+    <span class="n">background</span><span class="p">:</span><span class="n">removeFromParent</span><span class="p">()</span>
+    <span class="n">background</span> <span class="o">=</span> <span class="kc">nil</span>
+
+    <span class="n">dbg</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s2">"</span><span class="s">sceneBattle:tearDown done"</span><span class="p">)</span>
+<span class="k">end</span>
+<span class="n">sceneBattle</span><span class="p">:</span><span class="n">addEventListener</span><span class="p">({</span><span class="s2">"</span><span class="s">setUp"</span><span class="p">,</span> <span class="s2">"</span><span class="s">tearDown"</span><span class="p">},</span> <span class="n">sceneBattle</span><span class="p">)</span>
+
+<span class="c1">------------------------------------------------------------------------------------</span>
+
+<span class="n">director</span><span class="p">:</span><span class="n">moveToScene</span><span class="p">(</span><span class="n">sceneMainMenu</span><span class="p">)</span> <span class="c1">-- start game with instantaneous change to main menu (last scene created is current)</span>
+
+<span class="c1">-- simple global event to change current scene on touch</span>
+<span class="kd">local</span> <span class="n">touch</span> <span class="o">=</span> <span class="k">function</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">event</span><span class="p">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s2">"</span><span class="s">began"</span> <span class="k">then</span>
+        <span class="k">if</span> <span class="n">director</span><span class="p">:</span><span class="n">getCurrentScene</span><span class="p">()</span> <span class="o">==</span> <span class="n">sceneMainMenu</span> <span class="k">then</span>
+            <span class="n">battleCount</span> <span class="o">=</span> <span class="n">battleCount</span><span class="o">+</span><span class="mi">1</span>
+            <span class="n">director</span><span class="p">:</span><span class="n">moveToScene</span><span class="p">(</span><span class="n">sceneBattle</span><span class="p">,</span> <span class="p">{</span><span class="n">transitionType</span><span class="o">=</span><span class="s2">"</span><span class="s">slideInL"</span><span class="p">,</span> <span class="n">transitionTime</span><span class="o">=</span><span class="mf">0.5</span><span class="p">})</span>
+        <span class="k">else</span>
+            <span class="n">director</span><span class="p">:</span><span class="n">moveToScene</span><span class="p">(</span><span class="n">sceneMainMenu</span><span class="p">,</span> <span class="p">{</span><span class="n">transitionType</span><span class="o">=</span><span class="s2">"</span><span class="s">slideInL"</span><span class="p">,</span> <span class="n">transitionTime</span><span class="o">=</span><span class="mf">0.5</span><span class="p">})</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+<span class="n">system</span><span class="p">:</span><span class="n">addEventListener</span><span class="p">(</span><span class="s2">"</span><span class="s">touch"</span><span class="p">,</span> <span class="n">touch</span><span class="p">)</span>
+</pre></div>
+
+<p>A couple of notes:</p>
+
+<ul>
+<li>I'm using global variables for the scene to keep it simple</li>
+<li>setUp and tearDown are predefined valid event names for scenes</li>
+<li>By declaring them as member variables using the ":" operator, we get an automatic "self" reference to the scene itself from within the function.</li>
+<li>addEventListener registers a list of members (i.e. functions by name) for the given table (i.e. the scene)</li>
+<li>Let's run the code. On the Test tab in the launchpad, make sure Debug mode is selected and hit the Launch button. You should get an assert message box pop up when clickting to change the scene. It's fairly obviously pointing to a missing texture file. If you hit continue or ignore, the app will eventually display an error message and quit. This is because the lack of texture is an unrecoverable error. Quick looks for assets in the "resources" folder, so save the image below to resources/textures/backdrop.png.</li>
+</ul><p><img src="https://f.cloud.github.com/assets/1637721/623109/78a18eae-cf59-11e2-854b-122e04c83c13.png" alt="stars backdrop image"></p>
+
+<h2>
+<a name="debug-vs-release" class="anchor" href="#debug-vs-release"><span class="octicon octicon-link"></span></a>Debug vs Release</h2>
+
+<p>Try running again with Build Mode set to Release in the Launchpad. Note that in release mode you only get the error message and no asserts. But you still get a stack trace (in orange) in the console view.</p>
+
+<p>Everything should work with the texture added, but the screen size probably doesn't match the background size (depending on if you've been fiddling with the Simulator previously...) Go to Simulator &gt; Configuration &gt; Surface and set the width and height to 640x480 to match our background. Restart the app with Ctrl-T. Ctr-T is needed to restart the whole app - rather than Ctr-R, which just reloads the lua code - since Quick has internally cached the screen size on startup.</p>
+
+<p>We've got a huge image as our background and it's mostly black - a bit of waste of resources. Why not have a randomly generated star-field instead! In setUp, replace the background creation with:</p>
+
+<div class="highlight highlight-lua"><pre>    <span class="n">background</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createRectangle</span><span class="p">({</span>
+        <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">w</span><span class="o">=</span><span class="n">appWidth</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">appHeight</span><span class="p">,</span>
+        <span class="n">strokeWidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">.</span><span class="n">black</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">})</span>
+
+    <span class="nb">math.randomseed</span><span class="p">(</span><span class="nb">os.time</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1</span> <span class="k">do</span>
+        <span class="c1">-- star is local to a single loop call, but on each call a new vector object is created</span>
+        <span class="c1">-- Without "local", this would still work, but we'd have to do star=nil at the end or</span>
+        <span class="c1">-- the final object would still be referenced at the end</span>
+        <span class="kd">local</span> <span class="n">star</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createLines</span><span class="p">({</span><span class="n">x</span><span class="o">=</span><span class="nb">math.random</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">appWidth</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">math.random</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">appHeight</span><span class="p">),</span> <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">},</span> <span class="n">strokeWidth</span> <span class="o">=</span> <span class="mi">1</span><span class="p">})</span>
+
+        <span class="c1">-- set start colour: get a random white value then allow some variance in each channel for off-white result</span>
+        <span class="kd">local</span> <span class="n">brightness</span> <span class="o">=</span> <span class="nb">math.random</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">127</span><span class="p">)</span>
+        <span class="n">star</span><span class="p">.</span><span class="n">strokeColor</span> <span class="o">=</span> <span class="p">{</span><span class="nb">math.random</span><span class="p">(</span><span class="n">brightness</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="n">brightness</span><span class="p">),</span> <span class="nb">math.random</span><span class="p">(</span><span class="n">brightness</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">brightness</span><span class="p">),</span> <span class="nb">math.random</span><span class="p">(</span><span class="n">brightness</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="n">brightness</span><span class="p">)}</span>
+
+        <span class="n">background</span><span class="p">:</span><span class="n">addChild</span><span class="p">(</span><span class="n">star</span><span class="p">)</span>
+
+        <span class="c1">-- NB: background.children is now a table with references to the star objects.</span>
+        <span class="c1">-- star coords are now relative to background. We can now easily move them all by moving the background</span>
+    <span class="k">end</span>
+</pre></div>
+
+<p>And in tearDown, before background:removeFromParent, add:</p>
+
+<div class="highlight highlight-lua"><pre>    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="k">in</span> <span class="nb">pairs</span><span class="p">(</span><span class="n">background</span><span class="p">.</span><span class="n">children</span><span class="p">)</span> <span class="k">do</span>
+        <span class="n">v</span><span class="p">:</span><span class="n">removeFromParent</span><span class="p">()</span> <span class="c1">-- take object out of the scene, no references left so lua will garbage collect stars</span>
+    <span class="k">end</span>
+</pre></div>
+
+<h2>
+<a name="quick-tip" class="anchor" href="#quick-tip"><span class="octicon octicon-link"></span></a>Quick Tip</h2>
+
+<p>When a Lua error occurs, the app will output info to the console but will usually continue running unless a serious error is encountered in the internal C++ code (usually due to your bad Lua code :p). This can make finding the error in the console awkward as trace will keep running way past the error itself.</p>
+
+<p>A good solution is to add the following to your resources/app.icf file:</p>
+
+<pre><code>[s3e] WindowSuspendOnFocusLoss=1
+</code></pre>
+
+<p>For those new to Marmalade, app.icf is a standard Marmalade config file for setting runtime options. This option will suspend the app on Desktop when the window is out of focus (device builds are automatically paused on focus loss). With this set, you can just click on the trace console window to make the app window, and therefore all tracing, pause.</p>
+
+<p>It's always worth scrolling back through the trace if it doesn't appear to tell you a lot. A Lua error may have occured long before you notice any side-effects on screen.</p>
+
+<h2>
+<a name="notes-on-updates-from-beta-version-to-v10-release" class="anchor" href="#notes-on-updates-from-beta-version-to-v10-release"><span class="octicon octicon-link"></span></a>Notes on updates from Beta version to v1.0 release</h2>
+
+<ul>
+<li>myNode:destroy() was listed in the beta docs... this is an error as it doesn't actually exist! We "destroy" a Quick node by doing myNode:removeFromParent() then myNode = nil (see the background object in the code).</li>
+<li>myNode.children is a table with references to each object added with myNode:addChild() - this is really useful but was not documented in the beta.</li>
+<li>Rectangles and circles now have default anchor points of (0,0) like any other node. In the beta, they had undocumented (0.5,0.5) anchors so they were drawn centred on the x &amp; y position but this was considered confusing: inconsistent with other shapes; children positions were non-intuitive as they ignore the anchor offset.</li>
+</ul><h2>
+<a name="adding-balls-and-timers" class="anchor" href="#adding-balls-and-timers"><span class="octicon octicon-link"></span></a>Adding balls and timers</h2>
+
+<p>First, we'll define some useful globals for managing the scene:</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">minX</span> <span class="o">=</span> <span class="o">-</span><span class="n">appWidth</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">maxX</span> <span class="o">=</span> <span class="n">appWidth</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">minY</span> <span class="o">=</span> <span class="o">-</span><span class="n">appHeight</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">maxY</span> <span class="o">=</span> <span class="n">appHeight</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">ballRadius</span> <span class="o">=</span> <span class="mi">8</span>
+</pre></div>
+
+<p>In SceneBattle:SetUp(), we set up timers to add more balls. We also create an "origin" node object at screen center so that other objects can be positioned relative to this point by making them its children.</p>
+
+<div class="highlight highlight-lua"><pre>    <span class="n">ballSpeed</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ballCreateFlag</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1">-- queues up balls to add at any time</span>
+    <span class="n">ballTimer</span> <span class="o">=</span> <span class="n">system</span><span class="p">:</span><span class="n">addTimer</span><span class="p">(</span><span class="n">addNewBall</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">ballReplaceTimer</span> <span class="o">=</span> <span class="n">system</span><span class="p">:</span><span class="n">addTimer</span><span class="p">(</span><span class="n">replenishBalls</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createNode</span><span class="p">({</span><span class="n">x</span><span class="o">=</span><span class="n">appWidth</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">appHeight</span><span class="o">/</span><span class="mi">2</span><span class="p">})</span>
+</pre></div>
+
+<p>Lets create a ball object (using the "class" method with metatable lookup). We'll manage ball movement ourselves as its so simple but can "upgrade" to Quick's built in physics (box2d) if needed.</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">Collidable</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">Collidable</span><span class="p">.</span><span class="n">__index</span> <span class="o">=</span> <span class="n">Collidable</span>
+
+<span class="n">collidables</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">function</span> <span class="nc">Collidable</span><span class="p">.</span><span class="nf">Create</span><span class="p">(</span><span class="n">objType</span><span class="p">,</span> <span class="n">xPos</span><span class="p">,</span> <span class="n">yPos</span><span class="p">,</span> <span class="n">startVector</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">collidable</span> <span class="o">=</span> <span class="p">{}</span>                <span class="c1">-- the new object</span>
+    <span class="nb">setmetatable</span><span class="p">(</span><span class="n">collidable</span><span class="p">,</span><span class="n">Collidable</span><span class="p">)</span>  <span class="c1">-- make Player handle lookup</span>
+
+    <span class="k">if</span> <span class="n">objType</span> <span class="o">==</span> <span class="s2">"</span><span class="s">expander"</span> <span class="k">then</span> <span class="c1">--extend to ues for weapons</span>
+        <span class="c1">-- do </span>
+    <span class="k">elseif</span> <span class="n">objType</span> <span class="o">==</span> <span class="s2">"</span><span class="s">heatseeker"</span> <span class="k">then</span>
+        <span class="c1">-- do</span>
+        <span class="c1">-- etc</span>
+    <span class="k">else</span>
+        <span class="n">collidable</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createSprite</span><span class="p">({</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">xPos</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">yPos</span><span class="p">,</span>
+            <span class="n">xAnchor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+            <span class="n">yAnchor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">"</span><span class="s">textures/wrongball.png"</span><span class="p">})</span>
+
+        <span class="n">tween</span><span class="p">:</span><span class="n">from</span><span class="p">(</span><span class="n">collidable</span><span class="p">,</span> <span class="p">{</span><span class="n">xScale</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">yScale</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">0.5</span><span class="p">})</span> <span class="c1">--simple fade in anim</span>
+        <span class="k">end</span>
+    <span class="n">collidable</span><span class="p">.</span><span class="n">vec</span> <span class="o">=</span> <span class="n">startVector</span>
+    <span class="n">collidable</span><span class="p">.</span><span class="n">objType</span> <span class="o">=</span> <span class="n">objType</span>
+
+    <span class="n">origin</span><span class="p">:</span><span class="n">addChild</span><span class="p">(</span><span class="n">collidable</span><span class="p">)</span>
+    <span class="n">collidables</span><span class="p">[</span><span class="n">collidable</span><span class="p">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">collidable</span> <span class="c1">--node.name is a unique ID so we can track balls in the scene easily</span>
+    <span class="k">return</span> <span class="n">collidable</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>And finally implement the timer functions for adding new balls:</p>
+
+<div class="highlight highlight-lua"><pre><span class="k">function</span> <span class="nf">VectorFromAngle</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="nb">math.sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">*</span> <span class="n">size</span><span class="p">),</span> <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="nb">math.cos</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span> <span class="o">*</span> <span class="n">size</span><span class="p">)}</span>
+<span class="k">end</span>
+
+<span class="kd">local</span> <span class="n">addBall</span> <span class="o">=</span> <span class="k">function</span><span class="p">()</span>
+    <span class="c1">-- we push the ball straight to a global table in create so no need to get a ref here</span>
+    <span class="n">Collidable</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s2">"</span><span class="s">ball"</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">VectorFromAngle</span><span class="p">(</span><span class="nb">math.rad</span><span class="p">(</span><span class="nb">math.random</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">359</span><span class="p">)),</span> <span class="nb">math.random</span><span class="p">(</span><span class="n">ballSpeed</span><span class="p">,</span><span class="n">ballSpeed</span><span class="o">+</span><span class="mi">3</span><span class="p">)))</span>
+<span class="k">end</span>
+
+<span class="kd">local</span> <span class="n">addNewBall</span> <span class="o">=</span> <span class="k">function</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="n">ballSpeed</span> <span class="o">=</span> <span class="n">ballSpeed</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">addBall</span><span class="p">()</span>
+<span class="k">end</span>
+
+<span class="kd">local</span> <span class="n">replenishBalls</span> <span class="o">=</span> <span class="k">function</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ballCreateFlag</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">then</span>
+        <span class="n">ballSpeed</span> <span class="o">=</span> <span class="n">ballSpeed</span> <span class="o">+</span> <span class="mf">0.3</span>
+        <span class="n">ballCreateFlag</span> <span class="o">=</span> <span class="n">ballCreateFlag</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">addBall</span><span class="p">()</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<h2>
+<a name="adding-players-controls-and-health" class="anchor" href="#adding-players-controls-and-health"><span class="octicon octicon-link"></span></a>Adding players, controls and health</h2>
+
+<p>We add a player class like the collidables. Note that we're doing cheap collision detecting so have hard coded some size values. There's also a simple text label for health and we jump straight back to the main menu on health hitting zero.</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">Player</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">Player</span><span class="p">.</span><span class="n">__index</span> <span class="o">=</span> <span class="n">Player</span> <span class="c1">-- meta table to implement a "class" in lua</span>
+
+<span class="k">function</span> <span class="nc">Player</span><span class="p">.</span><span class="nf">Create</span><span class="p">(</span><span class="n">id</span><span class="p">,</span> <span class="n">health</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">player</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="nb">setmetatable</span><span class="p">(</span><span class="n">player</span><span class="p">,</span><span class="n">Player</span><span class="p">)</span>
+
+    <span class="c1">-- initialize the object</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">id</span> <span class="c1">-- player is just a table and we're assigning key-value pairs to it</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">touch</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">touch</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">touch</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">moveWithFinger</span> <span class="o">=</span> <span class="kc">false</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">health</span> <span class="o">=</span> <span class="n">health</span>
+
+    <span class="n">player</span><span class="p">.</span><span class="n">touchPosDiff</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">halfHeight</span> <span class="o">=</span> <span class="mi">21</span> <span class="c1">--for detecting collisions</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">sledColour</span> <span class="o">=</span> <span class="kc">nil</span>
+
+    <span class="c1">-- Visual stuff</span>
+    <span class="c1">-- Sleds are 8x42 with anchor at "front"</span>
+    <span class="c1">-- y pos of sled used for movement</span>
+    <span class="kd">local</span> <span class="n">mirrorX</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="kd">local</span> <span class="n">xPos</span> <span class="o">=</span> <span class="kc">nil</span>
+
+    <span class="k">if</span> <span class="n">id</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">then</span>
+        <span class="n">mirrorX</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">player</span><span class="p">.</span><span class="n">sledColour</span> <span class="o">=</span> <span class="n">color</span><span class="p">.</span><span class="n">fuchsia</span>
+        <span class="n">xPos</span> <span class="o">=</span> <span class="o">-</span><span class="n">appWidth</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">20</span>
+    <span class="k">else</span>
+        <span class="n">mirrorX</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">player</span><span class="p">.</span><span class="n">sledColour</span> <span class="o">=</span> <span class="n">color</span><span class="p">.</span><span class="n">yellow</span>
+        <span class="n">xPos</span> <span class="o">=</span> <span class="n">appWidth</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">20</span>
+    <span class="k">end</span>
+
+    <span class="c1">-- for now, use cheap labels for health</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createLabel</span><span class="p">({</span><span class="n">x</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">appHeight</span><span class="o">-</span><span class="mi">40</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">health</span><span class="p">})</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">label</span><span class="p">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">player</span><span class="p">.</span><span class="n">sledColour</span>
+    <span class="k">if</span> <span class="n">id</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">then</span> <span class="n">player</span><span class="p">.</span><span class="n">label</span><span class="p">.</span><span class="n">x</span><span class="o">=</span><span class="n">appWidth</span><span class="o">-</span><span class="mi">40</span> <span class="k">end</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">sled</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createSprite</span><span class="p">({</span><span class="n">x</span><span class="o">=</span><span class="n">xPos</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xAnchor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">yAnchor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">"</span><span class="s">textures/sledp"</span> <span class="o">..</span> <span class="n">id</span> <span class="o">..</span> <span class="s2">"</span><span class="s">.png"</span><span class="p">})</span>
+
+    <span class="c1">-- pre-calculate collision pos for balls to do super-cheap collision detection</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">collideX</span> <span class="o">=</span> <span class="n">player</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">mirrorX</span><span class="o">*</span><span class="n">ballRadius</span>
+    <span class="n">player</span><span class="p">.</span><span class="n">collideY</span> <span class="o">=</span> <span class="n">player</span><span class="p">.</span><span class="n">halfHeight</span> <span class="o">+</span> <span class="n">ballRadius</span> <span class="c1">--relative to sled</span>
+
+    <span class="n">origin</span><span class="p">:</span><span class="n">addChild</span><span class="p">(</span><span class="n">player</span><span class="p">.</span><span class="n">sled</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">player</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">Player</span><span class="p">:</span><span class="n">Destroy</span><span class="p">()</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">sled</span><span class="p">:</span><span class="n">removeFromParent</span><span class="p">()</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">label</span><span class="p">:</span><span class="n">removeFromParent</span><span class="p">()</span>
+<span class="k">end</span>
+
+<span class="c1">-- some functions we'll add later</span>
+<span class="k">function</span> <span class="nf">Player</span><span class="p">:</span><span class="n">AddAmmo</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">Player</span><span class="p">:</span><span class="n">AddHealth</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">Player</span><span class="p">:</span><span class="n">Fire</span><span class="p">(</span><span class="n">weapon</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">Player</span><span class="p">:</span><span class="n">TakeHit</span><span class="p">()</span> <span class="c1">-- simple "flash" anim</span>
+    <span class="n">tween</span><span class="p">:</span><span class="n">to</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sled</span><span class="p">,</span> <span class="p">{</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">0.1</span><span class="p">})</span>
+    <span class="n">tween</span><span class="p">:</span><span class="n">to</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">sled</span><span class="p">,</span> <span class="p">{</span><span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="mf">0.1</span><span class="p">})</span>
+    <span class="n">self</span><span class="p">.</span><span class="n">health</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">health</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">health</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">then</span>
+        <span class="n">director</span><span class="p">:</span><span class="n">moveToScene</span><span class="p">(</span><span class="n">sceneMainMenu</span><span class="p">,</span> <span class="p">{</span><span class="n">transitionType</span><span class="o">=</span><span class="s2">"</span><span class="s">slideInR"</span><span class="p">,</span> <span class="n">transitionTime</span><span class="o">=</span><span class="mf">0.5</span><span class="p">})</span>
+    <span class="k">end</span>
+
+    <span class="n">self</span><span class="p">.</span><span class="n">label</span><span class="p">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">health</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>Back in our SceneBattler:SetUp event, we set up the players:</p>
+
+<div class="highlight highlight-lua"><pre>    <span class="n">player1</span> <span class="o">=</span> <span class="n">Player</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">player2</span> <span class="o">=</span> <span class="n">Player</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">players</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="nb">table.insert</span><span class="p">(</span><span class="n">players</span><span class="p">,</span> <span class="n">player1</span><span class="p">)</span>
+    <span class="nb">table.insert</span><span class="p">(</span><span class="n">players</span><span class="p">,</span> <span class="n">player2</span><span class="p">)</span>
+</pre></div>
+
+<h2>
+<a name="collisions-and-touch-control" class="anchor" href="#collisions-and-touch-control"><span class="octicon octicon-link"></span></a>Collisions and Touch Control</h2>
+
+<p>Finally, we add some touch controls for player one and simple collision testing. The touch events move the sled exactly with the finger, and then apply some decelerated velocity on release.</p>
+
+<div class="highlight highlight-lua"><pre><span class="k">function</span> <span class="nf">sceneBattle</span><span class="p">:</span><span class="n">touch</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="n">event</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">appHeight</span><span class="o">/</span><span class="mi">2</span> <span class="c1">--touch 0,0 always bottom left; align with our origin</span>
+
+    <span class="k">if</span> <span class="n">event</span><span class="p">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s2">"</span><span class="s">began"</span> <span class="k">then</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">touch</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">x</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">touch</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">y</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">touchPosDiff</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">player1</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">y</span>
+    <span class="k">end</span>
+
+    <span class="k">if</span> <span class="n">event</span><span class="p">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s2">"</span><span class="s">ended"</span> <span class="k">then</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">moveWithFinger</span> <span class="o">=</span> <span class="kc">false</span>
+    <span class="k">end</span>
+
+    <span class="k">if</span> <span class="n">event</span><span class="p">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s2">"</span><span class="s">moved"</span> <span class="k">then</span>
+        <span class="n">xDiff</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">player1</span><span class="p">.</span><span class="n">touch</span><span class="p">.</span><span class="n">x</span>
+        <span class="n">yDiff</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">player1</span><span class="p">.</span><span class="n">touch</span><span class="p">.</span><span class="n">y</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">touch</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">x</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">touch</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">y</span>
+
+        <span class="n">player1</span><span class="p">.</span><span class="n">moveWithFinger</span> <span class="o">=</span> <span class="kc">true</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">yDiff</span> <span class="c1">--on finger-off, continue moving (will decelerate)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">sceneBattle</span><span class="p">:</span><span class="n">update</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="c1">-- Sled Movement:</span>
+
+    <span class="c1">-- move exactly with finger while finger is down</span>
+    <span class="k">if</span> <span class="n">player1</span><span class="p">.</span><span class="n">moveWithFinger</span> <span class="o">==</span> <span class="kc">true</span> <span class="k">then</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">player1</span><span class="p">.</span><span class="n">touch</span><span class="p">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">player1</span><span class="p">.</span><span class="n">touchPosDiff</span>
+    <span class="k">else</span>
+        <span class="c1">-- if finger is up, keep moving but decelerate</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">player1</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span>
+
+        <span class="k">if</span> <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">then</span>
+            <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">elseif</span> <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">then</span>
+            <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+
+    <span class="c1">-- keep within screen bounds</span>
+    <span class="k">if</span> <span class="n">player1</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">maxY</span> <span class="o">-</span> <span class="n">player1</span><span class="p">.</span><span class="n">halfHeight</span> <span class="k">then</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">maxY</span> <span class="o">-</span> <span class="n">player1</span><span class="p">.</span><span class="n">halfHeight</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elseif</span> <span class="n">player1</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">minY</span> <span class="o">+</span> <span class="n">player1</span><span class="p">.</span><span class="n">halfHeight</span> <span class="k">then</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">minY</span> <span class="o">+</span> <span class="n">player1</span><span class="p">.</span><span class="n">halfHeight</span>
+        <span class="n">player1</span><span class="p">.</span><span class="n">velocity</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">end</span>
+
+    <span class="c1">-- Balls:</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">obj</span> <span class="k">in</span> <span class="nb">pairs</span><span class="p">(</span><span class="n">collidables</span><span class="p">)</span> <span class="k">do</span>
+        <span class="c1">-- movement:</span>
+        <span class="n">obj</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">obj</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">obj</span><span class="p">.</span><span class="n">vec</span><span class="p">.</span><span class="n">y</span>
+        <span class="n">obj</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">obj</span><span class="p">.</span><span class="n">x</span> <span class="o">+</span> <span class="n">obj</span><span class="p">.</span><span class="n">vec</span><span class="p">.</span><span class="n">x</span>
+
+        <span class="c1">-- super simplistic bounce function. We put the ball on the screen edge rather than moving exactly</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="p">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">maxX</span> <span class="k">then</span>
+            <span class="n">obj</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">maxX</span>
+            <span class="n">obj</span><span class="p">.</span><span class="n">vec</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">obj</span><span class="p">.</span><span class="n">vec</span><span class="p">.</span><span class="n">x</span>
+            <span class="c1">-- bullets bounce once</span>
+            <span class="k">if</span> <span class="n">obj</span><span class="p">.</span><span class="n">objType</span> <span class="o">==</span> <span class="s2">"</span><span class="s">bullet"</span> <span class="k">then</span> <span class="n">obj</span><span class="p">.</span><span class="n">bulletFlag</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">end</span>
+        <span class="k">end</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="p">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">minX</span> <span class="k">then</span>
+            <span class="n">obj</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">minX</span>
+            <span class="n">obj</span><span class="p">.</span><span class="n">vec</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">obj</span><span class="p">.</span><span class="n">vec</span><span class="p">.</span><span class="n">x</span>
+            <span class="k">if</span> <span class="n">obj</span><span class="p">.</span><span class="n">objType</span> <span class="o">==</span> <span class="s2">"</span><span class="s">bullet"</span> <span class="k">then</span> <span class="n">obj</span><span class="p">.</span><span class="n">bulletFlag</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">end</span>
+        <span class="k">end</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="p">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">maxY</span> <span class="k">then</span>
+            <span class="n">obj</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">maxY</span>
+            <span class="n">obj</span><span class="p">.</span><span class="n">vec</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="n">obj</span><span class="p">.</span><span class="n">vec</span><span class="p">.</span><span class="n">y</span>
+        <span class="k">end</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="p">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">minY</span> <span class="k">then</span>
+            <span class="n">obj</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">minY</span>
+            <span class="n">obj</span><span class="p">.</span><span class="n">vec</span><span class="p">.</span><span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="n">obj</span><span class="p">.</span><span class="n">vec</span><span class="p">.</span><span class="n">y</span>
+        <span class="k">end</span>
+
+        <span class="c1">-- Collisions (cheap collisions, ignoring fact ball is rounded!)</span>
+        <span class="k">for</span> <span class="n">pK</span><span class="p">,</span><span class="n">player</span> <span class="k">in</span> <span class="nb">pairs</span><span class="p">(</span><span class="n">players</span><span class="p">)</span> <span class="k">do</span>
+            <span class="n">playerCollideYTop</span> <span class="o">=</span> <span class="n">player</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">y</span> <span class="o">+</span> <span class="n">player</span><span class="p">.</span><span class="n">collideY</span>
+            <span class="n">playerCollideYBot</span> <span class="o">=</span> <span class="n">player</span><span class="p">.</span><span class="n">sled</span><span class="p">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">player</span><span class="p">.</span><span class="n">collideY</span>
+
+            <span class="k">if</span> <span class="p">((</span><span class="n">player</span><span class="p">.</span><span class="n">collideX</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">obj</span><span class="p">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">player</span><span class="p">.</span><span class="n">collideX</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">player</span><span class="p">.</span><span class="n">collideX</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">obj</span><span class="p">.</span><span class="n">x</span> <span class="o">&gt;</span> <span class="n">player</span><span class="p">.</span><span class="n">collideX</span><span class="p">))</span>
+                <span class="ow">and</span> <span class="n">obj</span><span class="p">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">playerCollideYTop</span> <span class="ow">and</span> <span class="n">obj</span><span class="p">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">playerCollideYBot</span> <span class="k">then</span>
+
+                <span class="n">player</span><span class="p">:</span><span class="n">TakeHit</span><span class="p">()</span>
+                <span class="kd">local</span> <span class="n">fx</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createCircle</span><span class="p">({</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">obj</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">obj</span><span class="p">.</span><span class="n">y</span><span class="p">,</span>
+                    <span class="n">xAnchor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span><span class="n">yAnchor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                    <span class="n">radius</span><span class="o">=</span><span class="n">ballRadius</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">.</span><span class="n">lightBlue</span><span class="p">,</span> <span class="n">strokeWidth</span><span class="o">=</span><span class="mi">0</span><span class="p">})</span>
+                <span class="n">origin</span><span class="p">:</span><span class="n">addChild</span><span class="p">(</span><span class="n">fx</span><span class="p">)</span>
+                <span class="n">tween</span><span class="p">:</span><span class="n">to</span><span class="p">(</span><span class="n">fx</span><span class="p">,</span> <span class="p">{</span><span class="n">radius</span><span class="o">=</span><span class="n">ballRadius</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">onComplete</span><span class="o">=</span><span class="n">NodeDestroy</span><span class="p">})</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="s">destroy obj "</span> <span class="o">..</span> <span class="n">obj</span><span class="p">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">obj</span><span class="p">:</span><span class="n">removeFromParent</span><span class="p">()</span>
+                <span class="n">collidables</span><span class="p">[</span><span class="n">obj</span><span class="p">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">nil</span>
+
+                <span class="c1">--replace destroyed ball</span>
+                <span class="n">ballCreateFlag</span> <span class="o">=</span> <span class="n">ballCreateFlag</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">break</span>
+            <span class="k">end</span>
+        <span class="k">end</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">NodeDestroy</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="n">target</span><span class="p">:</span><span class="n">removeFromParent</span><span class="p">()</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>In the battle setUp and tearDown events we register and cancel the event handlers:</p>
+
+<div class="highlight highlight-lua"><pre>    <span class="n">system</span><span class="p">:</span><span class="n">addEventListener</span><span class="p">({</span><span class="s2">"</span><span class="s">touch"</span><span class="p">,</span> <span class="s2">"</span><span class="s">update"</span><span class="p">},</span> <span class="n">sceneBattle</span><span class="p">)</span>
+    <span class="o">...</span>
+    <span class="n">system</span><span class="p">:</span><span class="n">removeEventListener</span><span class="p">({</span><span class="s2">"</span><span class="s">touch"</span><span class="p">,</span> <span class="s2">"</span><span class="s">update"</span><span class="p">},</span> <span class="n">sceneBattle</span><span class="p">)</span>
+</pre></div>
+
+<p>And that's it for our basic game logic.</p>
+
+<p><img src="http://i1353.photobucket.com/albums/q663/GazDeaves/protoscreen_zpsacb418b1.png" alt="new game screenshot"></p>
+
+<h2>
+<a name="testing-on-device" class="anchor" href="#testing-on-device"><span class="octicon octicon-link"></span></a>Testing on device</h2>
+
+<p>I'm not gonna cover setting up for device testing in this post (check the basics here: <a href="http://quick-docs.madewithmarmalade.com/usingthelaunchpad.html">http://quick-docs.madewithmarmalade.com/usingthelaunchpad.html</a>) but we have an issue that our game is fixed to 640x480 resolution.</p>
+
+<p>Initially we'll take the easiest, but not the most elegant, way to deal with this and just fix to landscape and stretch our app to the screen. Open resources/app.icf and add the following:</p>
+
+<pre><code>[S3E]
+DispFixRot=Landscape
+
+[GL]
+VirtualWidth=640
+VirtualHeight=480
+VirtualLetterbox=1
+</code></pre>
+
+<p>The source for the Wrong prototype v1 is up on Github here: github.com/nickmarmalade/wrong-prototype</p>
+
+<h1>
 <a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h1>
 
 <p>The prototype and blog are both written by Nick Smith <a href="https://github.com/nickmarmalade" class="user-mention">@nickmarmalade</a>.</p>
