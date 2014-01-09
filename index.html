@@ -991,6 +991,254 @@ VirtualLetterbox=1
 <p>The source for the Wrong prototype v1 is up on Github here: github.com/nickmarmalade/wrong-prototype</p>
 
 <h1>
+<a name="building-a-marmalade-quick-game-part-4-api-best-practice" class="anchor" href="#building-a-marmalade-quick-game-part-4-api-best-practice"><span class="octicon octicon-link"></span></a>Building a Marmalade Quick Game part 4: API Best Practice</h1>
+
+<p>This post goes into detail about all the important concepts and best-practice tips learnt in my initial few weeks working with Marmalade Quick. It takes a lot of concepts from my previous post on Lua and puts them into context with Marmalade Quick.</p>
+
+<p>To find out more about Marmalade Quick, you can head over to <a href="http://madewithmarmalade.com/quick">this page</a> where you'll get the latest on the new version, as well as links to download so you can start coding straight away. If you have any burning questions that aren't covered in this series, you can head over to our developer network, <a href="https://devnet.madewithmarmalade.com/index.html">Marmalade Answers</a>, where you'll find helpful tips from our community and can even post your own requests for help.</p>
+
+<h2>
+<a name="arrays-vs-tables" class="anchor" href="#arrays-vs-tables"><span class="octicon octicon-link"></span></a>Arrays vs Tables</h2>
+
+<p>Variable length Lua arrays can be confusing in Lua! (see 'Tables as "Arrays"' in the Lua post)</p>
+
+<p>If you don't need to use contiguous integer values to access items in a list (e.g. you don't need them in a given order when looping though) then you should probably just stick to plain tables. You can loop through items in a table with a for loop. If you need a unique value to use for the key to an item and your item is (or contains as a member) a Quick "node" object, then you can just use <code>myNode.name</code> to get a guaranteed unique ID to use as the key. Unlike an array, you can also safely nil a table value in a <code>pairs()</code> loop which makes destroying game objects easy.</p>
+
+<p>Example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">myNodes</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">node1</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createNode</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">node2</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createNode</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">myNodes</span><span class="p">[</span><span class="n">node1</span><span class="p">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">node1</span>
+<span class="n">myNodes</span><span class="p">[</span><span class="n">node2</span><span class="p">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">node2</span>
+<span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="k">in</span> <span class="nb">pairs</span><span class="p">(</span><span class="n">myNodes</span><span class="p">)</span> <span class="k">do</span>
+    <span class="c1">--value is the node</span>
+    <span class="c1">--key is node.name</span>
+
+    <span class="n">value</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="c1">-- This will only set the local reference "value", not affect the table!</span>
+    <span class="c1">-- myNodes[key] will still return the node now, not nil.</span>
+
+    <span class="n">myNodes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">nil</span>
+    <span class="c1">-- If this index referred to a table (it does since "nodes" are tables), the object is no longer referenced by mNodes and will be garbage collected when appropriate. Note that we still have a reference to it, e.g. "node1", so that wont happen till that's also nilled.</span>
+<span class="k">end</span>
+</pre></div>
+
+<h2>
+<a name="using-object-oriented-design" class="anchor" href="#using-object-oriented-design"><span class="octicon octicon-link"></span></a>Using Object Oriented Design</h2>
+
+<p>Out of the box, Lua basically only supports values (numbers and strings) and key-indexed tables. But you can use tables to implement a wide range of other data types, including class-like objects. You'll almost definitely want to implement classes of some sort for a game. Quick's own object types like the node also provide their own object oriented functionality.</p>
+
+<h3>
+<a name="creating-classes" class="anchor" href="#creating-classes"><span class="octicon octicon-link"></span></a>Creating Classes</h3>
+
+<p>Read 'Tables as "classes" and the hidden "self" reference' in the introduction to Lua blog post above for info on creating basic classes in Lua. That method uses metatables to create classes. Quick provides some helpers to make this easier, namely the <code>baseClas</code>s global and the <code>inheritsFrom()</code> function. These implement the metatables trickery for you so you dont have to worry about how to do that. You can create new classes by just calling <code>myClass = inheritsFrom(baseClass)</code> and then implementing new() and init() functions for your class. You can then also do single inheritance using <code>myOtherNewClass = inheritsFrom(myClass)</code>. See Lua and object orientation for a guide to doing this.</p>
+
+<p>These methods works well for classes you create yourself, but you cannot use them to inherit from Quick's node objects...</p>
+
+<h3>
+<a name="classes-and-quick-objects-vs-lua-tables" class="anchor" href="#classes-and-quick-objects-vs-lua-tables"><span class="octicon octicon-link"></span></a>Classes and Quick objects vs. Lua tables</h3>
+
+<p><strong>NB: The "objects" and "libraries" provided with Quick look like lua tables. However, it is important to know that Quick objects are not actually tables! They are userdata types.</strong></p>
+
+<p>The userdata type allows arbitrary C data to be stored as a Lua variable. Userdata types are used to represent new types created by an application or library written in C. Internally, Quick uses Lua's C binding functionality to expose C objects (from the fast C++ Quick engine) to the Lua API, and it creates metadata types to do this. You don't need to understand how this works at all, but it means that while Quick's built in objects like nodes and sprites look like Lua tables, you cannot always use them in the same way as tables.</p>
+
+<p>The notable constraints for Quick's metadata objects are:</p>
+
+<ul>
+<li>Nodes are always created by the director, using <code>director:createXXX()</code> functions. This means that you cant just have an "empty" object that you can tweak values for before creating and pushing into the scene. They exist the moment the director creates them. You can however hide a visual node using <code>myNode.isVisible=false</code> or move it out of the current scene using <code>myNode:removeFromParent()</code> while keeping a handle to it until it is needed later.</li>
+<li>You cannot use <code>setmetatable()</code> with metadata.</li>
+</ul><p>The two constraints above collectively mean that <strong>you cannot use Quick's node objects with <code>inheritsFrom()</code> or easily create a class that inherits a Quick object</strong>. That means that, for example, if you want to have a class that encapsulates all the data for your player in your game, you cannot have a Player class that inherits from a Quick sprite. You would create a Player class, and then have to have the sprite as a member of the Player.</p>
+
+<p>You can directly access member values and functions of Quick's objects just as with tables. That includes non-documented internals - remember that Quick is open source so you can view and edit the Lua internals. Lua internal code all lives in the "quicklua" folder of your app. You can also add values, so for example with our Player example above you could create a sprite and then add a .player value to the sprite which points to the Player the sprite belongs to.</p>
+
+<p>Quick's functions use either the "." operator or the ":" operator. Functions declared with ":" versions will be automatically passed a self parameter (a reference to the object/table the function is a member of) when they are called. Quick's "node" object and its descendants like "sprite" and "circle" have functions for which the self parameter will give you access to the unique node involved, which is useful in callback style situations.</p>
+
+<h2>
+<a name="using-marmalade-quicks-node-object" class="anchor" href="#using-marmalade-quicks-node-object"><span class="octicon octicon-link"></span></a>Using Marmalade Quick's Node Object</h2>
+
+<p>If you need to create a class for some object in your app, remember that you cannot re-use/inherit a Marmalade Quick node for the reasons described above. You need to create a custom class and then add any nodes needed as members. For example:</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">myShip</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">myShip</span><span class="p">.</span><span class="n">health</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">myShip</span><span class="p">.</span><span class="n">img</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createSprint</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+
+<p>There are many functions that trigger events - for example, <code>node:addTimer()</code> or <code>tween:to()</code>. These functions will have one parameter that is the function to call when they complete (a "callback"), for example the function when the timer expires (funcortable) or when the tween is over (<code>onComplete</code>). They also either take a reference to the node involved or implicitly know the node as they are member functions of it (e.g. <code>myNode:addTimer</code>). You will usually want a handle back to the object that the event is related to when the event occurs, for example if you set a timer after which you want an object to "explode". Quick handles this by passing an table called event to the callback function, where event.target is the object. Often you want a handle to your own game class, i.e. myShip above, and not the Quick node so you will have to create a pointer from the node back to your object.</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">myShip</span><span class="p">.</span><span class="n">img</span><span class="p">.</span><span class="n">ship</span> <span class="o">=</span> <span class="n">myShip</span> <span class="c1">--pointer from Quick object back to custom one</span>
+<span class="n">myShip</span><span class="p">.</span><span class="n">img</span><span class="p">:</span><span class="n">addTimer</span><span class="p">(</span><span class="n">Explode</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">--start a timer that will internally track the img node that called it</span>
+<span class="k">function</span> <span class="nf">Explode</span><span class="p">(</span><span class="n">event</span><span class="p">)</span> <span class="c1">--when timer ends, event.target is the img node that called it</span>
+    <span class="n">event</span><span class="p">.</span><span class="n">target</span><span class="p">.</span><span class="n">ship</span><span class="p">:</span><span class="n">MakeExplode</span><span class="p">()</span> <span class="c1">--we can get the ship back from the img via our .ship reference</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>Quick timer functions can either be called from the global system object or from a node (or descendant of node like vector, sprite, circle, etc.) If you use the node version (e.g. <code>myNode:addTimer(myFunction,...)</code> then the callback function (e.g. <code>myFunction</code> here) gets a handle back to the node itself via event.target as shown above. If the node gets destroyed then the timer will also automatically cancel itself (the timer gets nil-ed with the node). If you use <code>system:addTimer(funcortable,...)</code>, the only way to track an object is by passing the object as the funcortable parameter (see Functions with "funcortable" parameters below). This is less flexible since the object needs to have a function matching the event name, so it is recommended to use <code>node:addTimer</code>, etc. if dealing with nodes.</p>
+
+<p>Here's an example of a class using timers, a node and the inheritsFrom </p>
+
+<div class="highlight highlight-lua"><pre><span class="k">function</span><span class="err">:</span>
+<span class="nf">cSpaceShip</span> <span class="o">=</span> <span class="n">inheritsFrom</span><span class="p">(</span><span class="n">baseClass</span><span class="p">)</span>
+
+<span class="k">function</span> <span class="nf">cSpaceShip</span><span class="p">:</span><span class="n">new</span><span class="p">(</span><span class="n">health</span><span class="p">,</span> <span class="n">ammo</span><span class="p">,</span> <span class="n">startX</span><span class="p">,</span> <span class="n">startY</span><span class="p">)</span>
+    <span class="kd">local</span> <span class="n">o</span> <span class="o">=</span> <span class="n">cSpaceShip</span><span class="p">:</span><span class="n">create</span><span class="p">()</span>
+
+    <span class="n">o</span><span class="p">.</span><span class="n">visualShip</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createNode</span><span class="p">({</span><span class="n">x</span><span class="o">=</span><span class="n">startX</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">startY</span><span class="p">,</span> <span class="o">...</span><span class="p">})</span>
+    <span class="n">o</span><span class="p">.</span><span class="n">visualShip</span><span class="p">.</span><span class="n">ship</span> <span class="o">=</span> <span class="n">o</span>
+    <span class="n">o</span><span class="p">.</span><span class="n">health</span> <span class="o">=</span> <span class="n">health</span>
+    <span class="n">o</span><span class="p">.</span><span class="n">ammo</span> <span class="o">=</span> <span class="n">ammo</span>
+    <span class="o">...</span>
+    <span class="n">add</span> <span class="n">other</span> <span class="n">visual</span> <span class="n">stuff</span> <span class="n">as</span> <span class="n">children</span>
+    <span class="n">set</span> <span class="n">other</span> <span class="n">internal</span> <span class="n">values</span>
+    <span class="n">etc</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="n">o</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">RestoreHealth</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="n">event</span><span class="p">.</span><span class="n">target</span><span class="p">.</span><span class="n">ship</span><span class="p">.</span><span class="n">health</span> <span class="o">=</span> <span class="n">event</span><span class="p">.</span><span class="n">target</span><span class="p">.</span><span class="n">ship</span><span class="p">.</span><span class="n">health</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="k">end</span>
+
+<span class="n">myShip</span> <span class="o">=</span> <span class="n">cSpaceShip</span><span class="p">:</span><span class="n">new</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">myShip</span><span class="p">:</span><span class="n">addTimer</span><span class="p">(</span><span class="n">RestoreHealth</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+<h2>
+<a name="marmalade-quick-parent-and-child-nodes-and-using-local-coordinate-spaces" class="anchor" href="#marmalade-quick-parent-and-child-nodes-and-using-local-coordinate-spaces"><span class="octicon octicon-link"></span></a>Marmalade Quick Parent and Child Nodes and Using Local Coordinate Spaces</h2>
+
+<p>Marmalade Quick uses descendants of nodes - circles, vectors, sprites, etc - to display and position visual objects. Each object of these types has a visual element, a position, various attributes, and can be made a child of other nodes. Children are positioned relative to their parent's x &amp; y origin values (i.e. the values given as the parent's x= and y= constructor values). Nodes that aren't explicitly made a child of another node are children of the scene. The scene itself is a type of node and has its x &amp; y origin at the bottom left of the screen.</p>
+
+<p>All nodes are drawn with their bottom left corner at their x &amp; y origin. One type that is slightly different is vectors/lines which has it's origin at it's specified x &amp; y position, with its various points/lines relative to that position (since you can have negative points in a line).</p>
+
+<p>Marmalade Quick has a concept of "anchors" which can be set for any object. Anchors move the object visually from it's x &amp; y position, by a proportion of the size of the node itself. You specify x &amp; y anchors as a values from 0 to 1, not in pixels. <code>xAnchor=0</code> means position in default place. <code>xAnchor=1</code> means move the "anchor" to the right by the width of the node, which effectively means that the image is drawn to the left of the default position, so that its right edge is at the nodes x,y position. Children of a node are positioned relative to the node's original x,y position and not its anchor offset. The point of anchors is basically to allow you to position sprites in a more intuitive way. For example a "wheel" sprite might want the anchor at (0.5,0.5) so it is centred at the node's x,y position.</p>
+
+<p><strong>NB: Anchors are not designed for creating some sort of local coordinate system for an object. Do not try to use them to position children relative to the parent!</strong></p>
+
+<p>For example, if you want to position a parent at (100,50) and a child at 10,10 from a specific point on the parent, you can't easily use the anchor to do that since children do not inherit the anchor offset. Also, the anchor values are fractions of the parent size, which is very unintuitive for positioning in pixels. You could use the anchors in this way, but then you also will likely end up setting the parent's x &amp; y position to something unintuitive and are limited to 0-1*width or height to offset by.</p>
+
+<p>What if you want to create a local coordinate space to position a group of objects relative to? The simplest example is if you want to have the centre of the screen as you scene origin. To achieve this, just use a non-visual "node" object (not a sprite, circle, etc) as the parent, by calling <code>director:createNode(...)</code>. You can then treat this as a local origin by adding other nodes as children of it. Similarly, you might want a local origin so objects can rotate around some given point, and again a "dummy node" is the solution.</p>
+
+<p>Example - A ship object, positioned by it's centre point and relative to the screen centre, with 2 gun objects that rotate around a point on the front of the ship:
+worldOrigin = director:createNode(appwidth/2,appheight/2)</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">myShip</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createSprite</span><span class="p">({</span><span class="s2">"</span><span class="s">myship.png"</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">xAnchor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">yAnchor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">})</span>
+<span class="n">worldOrigin</span><span class="p">:</span><span class="n">addChild</span><span class="p">(</span><span class="n">myShip</span><span class="p">)</span>
+<span class="c1">-- ship png is facing upwards by default, using anchor to have the displayed sprite centred on its position.</span>
+<span class="c1">-- children are still positioned relative to x &amp; y (i.e. middle of the diplsyed ship) as they dont inherit anchors.</span>
+
+<span class="n">shipGuns</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createNode</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">myShip</span><span class="p">:</span><span class="n">addChild</span><span class="p">(</span><span class="n">shipGuns</span><span class="p">)</span> <span class="c1">--guns node now sits towards front of ship (30 pixel offset)</span>
+
+<span class="n">gunLeft</span> <span class="o">=</span> <span class="n">createSprite</span><span class="p">({</span><span class="s2">"</span><span class="s">gun.png"</span><span class="p">,</span> <span class="n">x</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xAnchor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">yAnchor</span><span class="o">=</span><span class="mi">0</span><span class="p">})</span>
+<span class="n">shipGuns</span><span class="p">:</span><span class="n">addChild</span><span class="p">(</span><span class="n">gunLeft</span><span class="p">)</span>
+<span class="n">gunRight</span> <span class="o">=</span> <span class="n">createSprite</span><span class="p">({</span><span class="s2">"</span><span class="s">gun.png"</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xAnchor</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">yAnchor</span><span class="o">=</span><span class="mi">0</span><span class="p">})</span>
+<span class="n">shipGuns</span><span class="p">:</span><span class="n">addChild</span><span class="p">(</span><span class="n">gunRight</span><span class="p">)</span> <span class="c1">-- guns are positioned to sides of non-visual pivot point</span>
+</pre></div>
+
+<h2>
+<a name="destroying-objects-and-removing-them-from-the-scene" class="anchor" href="#destroying-objects-and-removing-them-from-the-scene"><span class="octicon octicon-link"></span></a>Destroying Objects and Removing Them From the Scene</h2>
+
+<p>The correct way to "destroy" an object is to call <code>myNode:removeFromParent()</code>, or <code>myParent:removeChild(myNode)</code> and then make sure all references to myNode in your code are set to nil. At any point, an active node will have a parent node. This might be another node - e.g. one sprite is the child of another via <code>node:addChild()</code> - or it may be the current scene. director:createNode/Sprite/etc. makes the new node a child of the current scene (the scene itself is a type of node). Nodes only ever have one parent; if a node already has a parent, calling <code>myNewParent:addChild(myNode)</code> will automatically remove it from it's existing parent. Often the only variable pointing to a node will be another node's .children table so you won't have to explicitly nil anything after calling <code>removeFromParent()</code>. See <a href="http://docs.madewithmarmalade.com/display/MD/Cleaning+up+scene+texture+resources+-+sprites%2C+atlases%2C+animations+and+fonts">Cleaning up scene texture resources - sprites, atlases, animations and fonts</a> in the Quick docs for info on cleaning up any resources like textures once you have finished with them.</p>
+
+<h2>
+<a name="events" class="anchor" href="#events"><span class="octicon octicon-link"></span></a>Events</h2>
+
+<p>In a nutshell, events work as follows:</p>
+
+<ul>
+<li>The event itself is a table that is returned to a handler function in some specific situation.</li>
+<li>You declare functions to handle events. These functions take a single parameter which the event object (table) will be passed to. Call the param what you want, but it's good practice to use "event"! e.g. <code>myHandlerFunction = function(event)</code>.</li>
+<li>You register for events by calling handler registration functions of relevant objects.</li>
+<li>The objects in Marmalade Quick that handle events are:</li>
+<li>The global "system" object - add handlers with <code>system:addEventListener listOfEventNames, funcortable)</code>.</li>
+<li>"nodes" - add handlers with <code>myNode:addEventListener(listOfEventNames, funcortable)</code>.</li>
+<li>There are also events specifically for "scenes" (a special type of node) which occur when <code>director:moveToScene()</code> is called.</li>
+<li>For timer events, event.timer is a handle to the timer itself.</li>
+<li>For timer or tween events that were called for a node, <code>event.target</code> is a handle to the node.</li>
+</ul><h2>
+<a name="functions-with-funcortable-parameters" class="anchor" href="#functions-with-funcortable-parameters"><span class="octicon octicon-link"></span></a>Functions with "funcortable" Parameters</h2>
+
+<p>Functions documented as having a "funcortable" parameter can be passed either:</p>
+
+<ul>
+<li>a reference to a single function of any name</li>
+<li>a reference to a table, which must contain a member function (or functions) named the same as the event(s) being registered</li>
+</ul><p>Typically, funcortables are useful when working in an object-oriented fashion. You can pass a class-style object as the funcortable value and give that object functions that match the expected names. Note that the event names are passed as a list (table) so you can register lots of events at once. Simple example.</p>
+
+<div class="highlight highlight-lua"><pre><span class="n">sceneMainMenu</span> <span class="o">=</span> <span class="n">director</span><span class="p">:</span><span class="n">createScene</span><span class="p">()</span>
+<span class="n">sceneMainMenu</span><span class="p">:</span><span class="n">addEventListener</span><span class="p">({</span><span class="s2">"</span><span class="s">setUp"</span><span class="p">,</span> <span class="s2">"</span><span class="s">exitPostTransition"</span><span class="p">},</span> <span class="n">sceneMainMenu</span><span class="p">)</span>
+
+<span class="k">function</span> <span class="nf">sceneMainMenu</span><span class="p">:</span><span class="n">touch</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">event</span><span class="p">.</span><span class="n">phase</span> <span class="o">==</span> <span class="s2">"</span><span class="s">began"</span> <span class="k">then</span>
+        <span class="n">director</span><span class="p">:</span><span class="n">moveToScene</span><span class="p">(</span><span class="n">nextScene</span><span class="p">,</span> <span class="p">{</span><span class="n">transitionType</span><span class="o">=</span><span class="s2">"</span><span class="s">slideInR"</span><span class="p">,</span> <span class="n">transitionTime</span><span class="o">=</span><span class="mf">1.0</span><span class="p">})</span>
+        <span class="n">system</span><span class="p">:</span><span class="n">removeEventListener</span><span class="p">(</span><span class="s2">"</span><span class="s">touch"</span><span class="p">,</span> <span class="n">sceneMainMenu</span><span class="p">)</span>
+    <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">sceneMainMenu</span><span class="p">:</span><span class="n">setUp</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="c1">-- setup scene objects here</span>
+    <span class="n">system</span><span class="p">:</span><span class="n">addEventListener</span><span class="p">(</span><span class="s2">"</span><span class="s">touch"</span><span class="p">,</span> <span class="n">sceneMainMenu</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">sceneMainMenu</span><span class="p">:</span><span class="n">exitPostTransition</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="c1">-- destroy scene objects here</span>
+<span class="k">end</span>
+</pre></div>
+
+<p>Note that because the functions above are declared with ":" syntax, they can also access the <code>sceneMainMenu</code> object itself using "self". This is the main upside of using a table. A simple function is useful if you want to register lots of functions of the same type of event. For example if you want to add a timer to a node, passing the node as the funcortable value means you can only register a single function, <code>myNode:timer</code>, whereas you likely want to have multiple timer events on one object. In this case you need to use a plain function and store your own pointer from the timer to the node if needed.</p>
+
+<h2>
+<a name="debugging-and-testing" class="anchor" href="#debugging-and-testing"><span class="octicon octicon-link"></span></a>Debugging and Testing</h2>
+
+<p>When a Lua error occurs, the app will output info to the console but will usually continue running unless an assert or serious error is encountered in the internal C++ code. This can make finding the error in the console awkward as trace will keep running.</p>
+
+<p>A good solution is to add the following to your app.icf:</p>
+
+<pre><code>[s3e] WindowSuspendOnFocusLoss=1
+</code></pre>
+
+<p>This will suspend the app when the window is out of focus, so you can just click on the trace console to pause everything.</p>
+
+<p>Note that you're app won't automatically suspend timers, animations, etc on suspend events. Timer callback events will queue internally and then fire in rapid succession when the app resumes! But you can pause all timers and tweens manually yourself using <code>node:pauseTimers()</code> etc.</p>
+
+<p><strong>Note: The info below is for Marmalade 6. With Marmalade 7.0 and newer, Quick has been integrated into the new shared "hub" GUI and can be used with most platforms out of the box. See <a href="http://docs.madewithmarmalade.com/display/MD/Using+the+Hub">Using the Hub</a> in the official docs</strong></p>
+
+<p>The launchpad lets you pick "Debug" or "Release" mode with a radio button at the top for both Simulator and devices. Debug uses versions of the C++ Marmalade Quick pre-built binary and Marmalade loader (platform abstraction layer) that include tracing and asserts but will run slower; Release has no C++/native debug info or events. Note that option does not affect the Lua code at all! By efault dbg.print() will continue to output to console even in release mode.</p>
+
+<p>To control lua debugging, you need to use config.lua (see <a href="http://quick-docs.madewithmarmalade.com/ConfiguringYourApp.html#config-lua-file">http://quick-docs.madewithmarmalade.com/ConfiguringYourApp.html#config-lua-file</a>) Essentially, Lua debugging features are mostly turned on by default and will slow your app down a <em>lot</em>, so for the store and when testing performance, you should do the following:</p>
+
+<ul>
+<li>Add a config.lua file next to your main.lua</li>
+<li>Set the following in config.lua:</li>
+</ul><div class="highlight highlight-lua"><pre><span class="n">config</span> <span class="o">=</span>
+<span class="p">{</span>
+    <span class="n">debug</span> <span class="o">=</span>
+    <span class="p">{</span>
+        <span class="n">general</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="n">assertDialogs</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="n">typeChecking</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="n">traceGC</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>In Marmalade Quick 1.0 when launching the Simulator from the Launchpad, even if you pick Release mode it will still use the debug loader which means there will be a performance hit - see below for a workaround. This does not affect device builds.</p>
+
+<p>If you want someone to test your build without a Marmalade SDK or importing your Quick project, you can use the standard Deploy Tool (Advanced &gt; Launch Deploy Tool) to do Windows/Mac x86 deployments if you have a Plus license or higher. The Deploy Tool is also useful as you can separately select between debug and release versions of the Marmalade loader (abstraction layer) and Quick app (C++ implementation of Quick). Release builds will run at full speed while debug ones will output internal debug info to trace but run slower. If you use the Deploy Tool release builds will use the release loader by default. If you have an Indie or community license, you can still pick Windows/Mac <em>Simulator</em> to test on desktop at full speed. The difference between Simulator and full deployment is that Simulator gives you settings menus and requires the SDK to run.</p>
+
+<p>You probably want to test deployed builds at specific resolutions. Desktop deployed builds run windowed at 800x600 by default. Use [s3e] WinHeight= WinWidth= WinResizable= ICF options in app.icf to specify window size and behaviour when you don't have the Simulator menus.</p>
+
+<h2>
+<a name="upgrading-projects-from-older-quick-versions" class="anchor" href="#upgrading-projects-from-older-quick-versions"><span class="octicon octicon-link"></span></a>Upgrading Projects From Older Quick Versions</h2>
+
+<p>We changed some APIs and broke back-compatibility between the beta and 1.0 Quick release version! If upgrading a project, you must replace the "quicklua" folder in the old project with a copy of the new one found in /quick/data/quicklua Some minor breaking changes were also added in Quick 1.1. See the change log in the Quick docs for more info.</p>
+
+<h2>
+<a name="what-happened-to-wrong" class="anchor" href="#what-happened-to-wrong"><span class="octicon octicon-link"></span></a>What Happened to "Wrong"?</h2>
+
+<p>My little Weaponified Reverse pONG game is moving along slowly. As a proof of concept, I've uploaded a version (that's slightly more advanced than the one in part 3...) to the BlackBerry World store for BlackBerry 10. Treat that as a preview of the weapons, effects and retro styling I'll be covering in the next post: <a href="http://appworld.blackberry.com/webstore/content/24134883/">View and download Wrong for BlackBerry 10</a></p>
+
+<h1>
 <a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h1>
 
 <p>The prototype and blog are both written by Nick Smith <a href="https://github.com/nickmarmalade" class="user-mention">@nickmarmalade</a>.</p>
