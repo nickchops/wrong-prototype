@@ -6,13 +6,17 @@ Wrong (Weaponified Reverse pONG) is a game by Nick Smith, built from scratch usi
 Marmalade Quick is a 2D rapid app dev toolkit that runs on top of the Marmalade SDK:
    http://www.madewithmarmalade.com/quick
 
-You need a Marmalade license to build the code as-is and to deploy to devices. Wrong should build and run on any device that supports Quick (Android, iOS, BlackBerry 10, PlayBook, PC and Mac desktop)
+You need a Marmalade license to build the code as-is and to deploy to devices. Wrong should build and run on any device that supports Quick (Android, iOS, BlackBerry 10, PlayBook, PC and Mac desktop...)
+
+This project is located at:
+
+   http://github.com/nickchops/wrong-prototype
 
 This prototype version was built to accompany a set of tutorial blogs from the Marmalade developer website. The code here is from part 3 of the blog posts.
 
-See the Github page for more info and a complete up-dated reproduction of the original blog posts:
+See the Github Page for more info and a complete up-dated reproduction of the original blog posts:
 
-   http://nickmarmalade.github.io/wrong-prototype/
+   http://nickchops.github.io/wrong-prototype
 
 Those original blog posts started here:
    www.madewithmarmalade.com/blog/building-marmalade-quick-game-nick-smith-part-1-getting-started
@@ -20,7 +24,8 @@ Those original blog posts started here:
 A more advanced version Wrong (v 0.7) is available on the BlackBerry World store for BB10 as a proof of concept.
    http://appworld.blackberry.com/webstore/content/24134883/
 
-Wrong v1 will be uploaded to a whole bunch of stores and github when ready along with accompanying blog posts.
+Wrong v1 will be uploaded to a whole bunch of stores and GitHub when ready along with accompanying blog posts.
+Check back here for more info
 
 WRONG prototype is provided under the MIT license:
 
